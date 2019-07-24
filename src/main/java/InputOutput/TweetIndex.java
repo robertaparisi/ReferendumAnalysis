@@ -21,41 +21,16 @@ import java.io.InputStreamReader;
 import java.io.Reader;
 import java.nio.charset.StandardCharsets;
 import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
 import java.util.zip.GZIPInputStream;
-import javax.swing.text.Document;
-import org.apache.lucene.analysis.Analyzer;
-import org.apache.lucene.analysis.core.WhitespaceAnalyzer;
 import org.apache.lucene.analysis.it.ItalianAnalyzer;
 import org.apache.lucene.document.Field;
 import org.apache.lucene.document.LongField;
 import org.apache.lucene.document.StringField;
-import org.apache.lucene.document.TextField;
-import org.apache.lucene.index.DirectoryReader;
-import org.apache.lucene.index.IndexReader;
 import org.apache.lucene.index.IndexWriter;
 import org.apache.lucene.index.IndexWriterConfig;
-import org.apache.lucene.index.Term;
-import org.apache.lucene.queryparser.classic.QueryParser;
-import org.apache.lucene.search.BooleanClause;
-import org.apache.lucene.search.BooleanQuery;
-import org.apache.lucene.search.IndexSearcher;
-import org.apache.lucene.search.Query;
-import org.apache.lucene.search.ScoreDoc;
-import org.apache.lucene.search.TermQuery;
-import org.apache.lucene.search.TopDocs;
-import org.apache.lucene.search.TotalHitCountCollector;
 import twitter4j.JSONException;
 import twitter4j.JSONObject;
 import org.apache.lucene.store.FSDirectory;
-import org.apache.lucene.store.Directory;
-import org.apache.lucene.store.SimpleFSDirectory;
 import org.apache.lucene.util.Version;
 import twitter4j.HashtagEntity;
 import twitter4j.TwitterException;
@@ -81,13 +56,14 @@ public class TweetIndex {
         //returning the buffered reader for the file
         return br;
         }
+    
     public static IndexWriter createNewIndex(String sub_directory) throws IOException{
         ItalianAnalyzer analyzer = new ItalianAnalyzer(Version.LUCENE_41);
         IndexWriterConfig cfg = new IndexWriterConfig(Version.LUCENE_41, analyzer);
         File indexFile = new File("src/main/resources/outputData" + sub_directory);
         FSDirectory index = FSDirectory.open(indexFile);
         return new IndexWriter(index, cfg);
-} 
+    } 
 
 
     public static org.apache.lucene.document.Document createNewDoc(Long date, Long id, String screenname, String name, String text, String hashtags, String mentions) {       
@@ -161,50 +137,5 @@ public class TweetIndex {
         index_writer.commit(); 
         index_writer.close();
     }
-//    throws IOException, ParseException, java.text.ParseException, JSONException, TwitterException
-     public static void createIndexYesNoUser(Directory dir, ArrayList<String> politicians)  {
-//          private static void index(Directory dir, ArrayList<String> screenNames, String fileName, boolean stemming) throws IOException {
-        IndexReader ir;
-        IndexSearcher searcher;
-        ir = DirectoryReader.open(dir);
-        searcher = new IndexSearcher(ir);
-        BooleanQuery names = new BooleanQuery();
-        //String q = "";
-        for (String name : screenNames) {
-            Query n = new TermQuery(new Term("screenname", name));
-            names.add(n, BooleanClause.Occur.SHOULD);
-        }
-        BooleanQuery query = new BooleanQuery();
-        query.add(names, BooleanClause.Occur.MUST);
-
-        TopDocs top = searcher.search(query, 100000000);
-        ScoreDoc[] hits = top.scoreDocs;
-
-        org.apache.lucene.document.Document doc;
-        Directory d = new SimpleFSDirectory(new File(fileName));
-        TwitterIndex index = new TwitterIndex(d, stemming);
-
-        for (ScoreDoc entry : hits) {
-            doc = searcher.doc(entry.doc);
-            Long date = Long.parseLong(doc.get("date"));
-            Long id = Long.parseLong(doc.get("id"));
-            String screenName = doc.get("screenname");
-            String name = doc.get("name");
-            Long followers = Long.parseLong(doc.get("followers"));
-            String text = doc.get("text");
-            String hashtags = doc.get("hashtags");
-            String mentions = doc.get("mentions");
-
-            index.addTweet(date, id, screenName, name, followers, text, hashtags, mentions);
-        }
-        index.close();
-
   
-
-
-         
-    }
-    
-    
-    
 }
