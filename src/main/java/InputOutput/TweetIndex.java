@@ -65,6 +65,9 @@ import twitter4j.UserMentionEntity;
 public class TweetIndex {
     
     public static final String  stream_directory = "src/main/resources/data/stream/";
+    public static final String  sourcenames_directory = "src/main/resources/data/sourcenames/";
+    public static final String  output_data_directory= "src/main/resources/outputData/";
+    public static final String  tweets_index_directory = output_data_directory + "tweets_index/";
     public static final File[] stream_days_subdir = new File(stream_directory).listFiles((File file) -> file.isDirectory());
     private static Object GzipReader;
     
@@ -108,7 +111,8 @@ public class TweetIndex {
         String tweet;
         org.apache.lucene.document.Document document;
         
-        IndexWriter index_writer = createNewIndex("/tweets_index/");     
+        
+        IndexWriter index_writer = createNewIndex(tweets_index_directory);     
         System.out.println("Number of folder: " + stream_directory.length());
         for (File subDirectory : stream_days_subdir) {
             System.out.println("Reading file in the folder " +  subDirectory.getName());

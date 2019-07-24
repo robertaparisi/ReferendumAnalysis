@@ -1,6 +1,7 @@
 package InputOutput;
 
 
+import static InputOutput.GetPoliticiansFile.decompress;
 import static InputOutput.TweetIndex.createIndexAllTweets;
 import java.io.IOException;
 import java.text.ParseException;

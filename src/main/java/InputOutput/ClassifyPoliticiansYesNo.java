@@ -5,7 +5,16 @@
  */
 package InputOutput;
 
+import static InputOutput.TweetIndex.sourcenames_directory;
+import static InputOutput.TweetIndex.tweets_index_directory;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -23,6 +32,7 @@ import org.apache.lucene.search.Query;
 import org.apache.lucene.search.TermQuery;
 import org.apache.lucene.search.TotalHitCountCollector;
 import org.apache.lucene.store.Directory;
+import org.apache.lucene.store.SimpleFSDirectory;
 import org.apache.lucene.util.Version;
 
 /**
@@ -32,18 +42,22 @@ import org.apache.lucene.util.Version;
 public class ClassifyPoliticiansYesNo {
     
     
-    public static Map<String, List<String>> classifyPoliticians(Directory dir, ArrayList<String> politicians) throws IOException  {
+    public static Map<String, List<String>> classifyPoliticians(Directory dir, String[] politicians) throws IOException  {
         IndexReader index_reader = DirectoryReader.open(dir);
         IndexSearcher searcher = new IndexSearcher(index_reader);
+        
         Analyzer analyzer = new WhitespaceAnalyzer(Version.LUCENE_41);
         QueryParser qparser = new QueryParser(Version.LUCENE_41, "hashtags", analyzer);
+        
         String[] yes_tags = {"bastaunsi", "si", "iodicosi", "iovotosi"};
         String[] no_tags = {"iodicono", "iovotono", "no", "bastaunno"};
+        
         BooleanQuery yes = new BooleanQuery();
-        for (String tag : yes_tags) {
+                for (String tag : yes_tags) {
             Query query_term = new TermQuery(new Term("hashtags", tag));
             yes.add(query_term, BooleanClause.Occur.SHOULD);
         }
+        
         BooleanQuery no = new BooleanQuery();
         for (String tag : no_tags) {
             Query query_term = new TermQuery(new Term("hashtags", tag));
@@ -55,7 +69,7 @@ public class ClassifyPoliticiansYesNo {
         Query q;
         List<String> yes_politicians = new ArrayList<>();
         List<String> no_politicians = new ArrayList<>();
-        Map<String, List<String>> ans  = new HashMap<>();
+        Map<String, List<String>> yes_no_hashmap  = new HashMap<>();
         
         for (String politician: politicians) {
          
@@ -92,9 +106,22 @@ public class ClassifyPoliticiansYesNo {
 //                if they never used a tag between the yes or no tag that we have they are not going to be stored
             }
         }
-        ans.put("yes", yes_politicians);
-        ans.put("no", no_politicians);
+        yes_no_hashmap.put("yes", yes_politicians);
+        yes_no_hashmap.put("no", no_politicians);
         return (ans);
-}
+    }
+    
+    
+    public static void main (String[] args) throws FileNotFoundException, UnsupportedEncodingException, IOException {
+      
+        FileInputStream fstream = new FileInputStream(sourcenames_directory + "politicians.txt");
+        InputStreamReader file_reader = new InputStreamReader(fstream, "UTF-8");
+        BufferedReader br = new BufferedReader(file_reader); 
+        String[] politicians = br.readLine().split(",");
+        Directory tweets_idx_dir = new SimpleFSDirectory(new File(tweets_index_directory));
+        classifyPoliticians(tweets_idx_dir , politicians);
+               
+        
+    }
     
 }
