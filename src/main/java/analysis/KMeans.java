@@ -1,0 +1,167 @@
+/*
+ * To change this license header, choose License Headers in Project Properties.
+ * To change this template file, choose Tools | Templates
+ * and open the template in the editor.
+ */
+package analysis;
+
+import static java.lang.Math.floor;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.LinkedHashSet;
+import java.util.Map;
+import java.util.Random;
+import org.apache.commons.lang3.StringUtils;
+
+/**
+ *
+ * @author Roberta
+ */
+public class KMeans {
+    
+    private final HashMap<String, Integer> termSAXclusterid; // Sax String and its cluster id
+    private final int k;
+    private final Object[] terms_list;
+    private final Map<String, String> termsSAXstring;
+    private final Object [] saxStrings;
+    private final int saxStringsSize;
+    private final Random rand = new Random(25023);
+
+
+
+    public KMeans(int k, Map<String, String> termsSAXstring) {
+        this.termSAXclusterid = new HashMap<>();
+        this.k = k;
+        this.termsSAXstring = termsSAXstring;
+        this.terms_list =  termsSAXstring.keySet().toArray() ;
+        this.saxStrings = termsSAXstring.values().toArray();        
+        this.saxStringsSize = termsSAXstring.get(termsSAXstring.keySet().stream().findFirst().get()).length();
+    }
+
+    private String [] getKRandomCentroids() {
+        String[] centroids = new String[this.k];
+        for (int i = 0; i < this.k; i++) {
+            centroids[i] = this.saxStrings[rand.nextInt(this.saxStrings.length)].toString();
+        }
+        return centroids;
+    }   
+    
+    /*
+    if we do not have a centroid yet, we are going to create it or, better said, we are going to take one random Sax String
+    from the list that contain all the possible sax string and use it as random
+    */
+    private String getRandomCentroid() {
+        String centroid  = this.saxStrings[rand.nextInt(this.saxStrings.length)].toString();
+        return centroid;
+    }   
+    
+    /*
+    Here we are going to create the centroid, assing a random one if it's empty, otherwise we are going
+    to compute the average character for each character position, considering all the element in the cluster list
+    */
+     
+    private String getClusterCentroid(LinkedHashSet<String> cluster) {        
+        ArrayList<String> clusterList = new ArrayList<>(cluster); 
+        String centroid = "";         
+        if (cluster.isEmpty()) {
+            centroid = getRandomCentroid();
+        }
+        else{
+            for (int i = 0; i < this.saxStringsSize; i++) {
+                int chars = 0;
+                for (String element : clusterList) {
+                    chars += (int) element.charAt(i);
+                }
+                centroid += (char) (int)(chars/cluster.size());
+            } 
+        }   
+        return centroid;
+    }
+    
+    
+
+    /*
+    Computing the centroids for all the k clusters
+    */
+    private String[] computeCentroids(ArrayList<LinkedHashSet<String>> clusters) {
+        String[] centroids = new String[this.k];
+        for (int i = 0; i < this.k; i++) {
+            centroids[i] = getClusterCentroid(clusters.get(i));
+        }
+        return centroids;
+    }
+    
+    
+
+    /*
+    We need to check if the sax string is in the right cluster, so we check at the entire clusters list, 
+    if the Sax String is not assigned to the same  cluster we remove it from the old cluster and put it into the new
+    cluster, updating also the termSAXclusterid, so that the list sax string, cluster id is also updated.
+    
+    Why  I used a LinkedHashSet???
+    
+    A LinkedHashSet is an ordered version of HashSet that maintains a doubly-linked List across all elements. 
+    When the iteration order is needed to be maintained this class is used. 
+     */
+    private void updateCluster(ArrayList<LinkedHashSet<String>> clusters, String saxString, int newCluster) {
+        if (this.termSAXclusterid.containsKey(saxString)) {
+            int oldCluster = this.termSAXclusterid.get(saxString);
+            if (oldCluster != newCluster) {
+                LinkedHashSet<String> oldClusterUpdated = clusters.get(oldCluster);
+                oldClusterUpdated.remove(saxString);                
+            }
+        }
+        LinkedHashSet<String> newClusterUpdated = clusters.get(newCluster);  
+        newClusterUpdated.add(saxString);
+        this.termSAXclusterid.put(saxString, newCluster); 
+    }
+   
+    
+    /*
+    this function that return an hashmap that contains for each SAX string the id of the cluster to whom 
+    it belong to. The way in which this function work is storing the error and updating it after each iteration, 
+    adding the new error that results from the new assignment of one sax string to a cluster. In particular, the amount that we will
+    add is the minimum distance between the clusters and the sax string. 
+     */
+    public HashMap<String, Integer> computeKMeans() throws Exception {
+        int list_size = saxStrings.length;
+        int old_error = 0;
+        int new_error = 0; 
+        String[] centroids;
+        // clusters is an auxiliary structure that allows indexed access
+        // instantiate the empty clusters (sets) inside the list of clusters
+        ArrayList<LinkedHashSet<String>> clusters = new ArrayList<>();
+        for (int i = 0; i < k; i++) {
+            clusters.add(new LinkedHashSet<>());
+        }
+        centroids = getKRandomCentroids();
+        System.out.println("Centroidi STEP 0: "+ Arrays.toString(centroids));
+        
+        do {
+            old_error = new_error;
+            new_error = 0;
+            for (int i = 0; i < list_size; i++) {
+                int min_distance = Integer.MAX_VALUE;
+                String sax_string = (String) this.saxStrings[i];
+                int distance;
+                int new_cluster = 0;
+                for (int num_cluster = 0; num_cluster < k; num_cluster++) {
+                    distance = StringUtils.getLevenshteinDistance(sax_string,  centroids[num_cluster]);
+//                    System.out.println(sax_string + " distanza di: " +distance + " per il cluster "+ num_cluster + "che e' = "+ centroids[num_cluster]);
+                    if (distance < min_distance) {
+                        min_distance = distance;
+                        new_cluster = num_cluster;
+                    }
+                }
+//                System.out.println("==============================");
+                new_error += min_distance; 
+                updateCluster(clusters, sax_string, new_cluster);
+            }
+            centroids = computeCentroids(clusters); // calculate the centroids for the next iteration
+        } while (old_error != new_error);
+        return termSAXclusterid;
+    }
+ 
+   
+}
