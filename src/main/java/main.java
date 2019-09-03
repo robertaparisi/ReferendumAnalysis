@@ -16,8 +16,8 @@ public class main {
         indexing.MainIndex.run_main_index(recalculate_general_index,recalculate_yesno_index);
         
          
-//        Boolean create_temporal_yesno_plot = true;
-        Boolean create_temporal_yesno_plot = false;
+        Boolean create_temporal_yesno_plot = true;
+//        Boolean create_temporal_yesno_plot = false;
         if (create_temporal_yesno_plot){
             TimeSeriesPlot.create_timeseries_plot();
             

@@ -13,8 +13,10 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Random;
+import java.util.Set;
 import org.apache.commons.lang3.StringUtils;
 
 /**
@@ -120,7 +122,47 @@ public class KMeans {
         this.termSAXclusterid.put(saxString, newCluster); 
     }
    
+      
+    private Map<Integer, ArrayList<String>> getClusterMap(HashMap<String, Integer> termSAXclusterid, Map<String, String> termSAXstrings) {
+        Map<Integer, ArrayList<String>> cluster_term = new HashMap<>();
+        String[] sax_strings = termSAXclusterid.keySet().toArray(new String[termSAXclusterid.size()]);
+        String[] terms = termSAXstrings.keySet().toArray(new String[termSAXstrings.size()]);
+        for (int i = 0; i < termSAXclusterid.size(); i++) {
+            int cluster =  termSAXclusterid.get(sax_strings[i]);
+            ArrayList<String> t = new ArrayList<>();
+            t.add(terms[i]);
+            if (cluster_term.containsKey(cluster)) {
+                t.addAll(cluster_term.get(cluster));
+            }
+            cluster_term.put(cluster, t);
+        }
+        return (cluster_term);
+    }
     
+//    public Map<Integer, ArrayList<String>> bestKMeans() {
+//        
+//        int num_iter = 25;
+//        Map<Integer, ArrayList<String>> cluster_term = new HashMap<>();
+//        List<Double> error = new ArrayList<>();
+//        ArrayList<ArrayList<Double>> centroids = new ArrayList<>();
+//
+//        double distOld = Integer.MAX_VALUE;
+//        double distNew;
+//        for(int iter=0; iter< num_iter; iter++) {
+//            Map<Integer, ArrayList<String>> clusters = computeKMeans();
+//            distNew = clusterDist;
+//            if(distOld>distNew) {
+//                System.out.println("best score:"+distNew);
+//                fclusters = clusters;
+//                distOld = distNew;
+//                centroids = clusterCentroids;
+//            }
+//        }
+//        scores = cScores;
+//        clusterCentroids = centroids;
+//    return(fclusters);
+//}
+  
     /*
     this function that return an hashmap that contains for each SAX string the id of the cluster to whom 
     it belong to. The way in which this function work is storing the error and updating it after each iteration, 
@@ -163,15 +205,21 @@ public class KMeans {
             }
             centroids = computeCentroids(clusters); // calculate the centroids for the next iteration
         } while (old_error != new_error);
+        System.out.println("error: "+ new_error);
         return termSAXclusterid;
     }
+    
+    
     public static void saveCluster(HashMap<String, Integer> sax_string_cluster, Map<String, String> termSAXstrings,  String file_name) throws IOException {
         PrintWriter pw = new PrintWriter(new FileWriter(file_name));
         String[] term = termSAXstrings.keySet().toArray(new String[termSAXstrings.size()]);
         String[] sax_string = sax_string_cluster.keySet().toArray(new String[sax_string_cluster.size()]);
+
         for (int i = 0; i < sax_string_cluster.size() ; i++) {
             pw.println( term[i] + " "+ sax_string[i] + " " + sax_string_cluster.get(sax_string[i]));
+            
         }
+        
 
         pw.close();
     } 
