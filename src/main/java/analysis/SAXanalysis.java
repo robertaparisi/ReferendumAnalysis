@@ -4,44 +4,12 @@
  * and open the template in the editor.
  */
 package analysis;
-import static analysis.TemporalAnalysis.compute_sax_analysis;
 import indexing.TweetIndex;
 import static indexing.TweetIndex.output_data_directory;
-import java.io.File;
-import java.io.FileWriter;
 import java.io.IOException;
-import java.io.PrintWriter;
-import java.text.ParseException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.NavigableMap;
-import java.util.Optional;
-import java.util.Set;
-import java.util.Spliterator;
-import java.util.TreeMap;
 import java.util.concurrent.TimeUnit;
-import net.seninp.jmotif.sax.SAXException;
-import net.seninp.jmotif.sax.SAXProcessor;
-import net.seninp.jmotif.sax.alphabet.NormalAlphabet;
-import net.seninp.jmotif.sax.datastructure.SAXRecords;
-import org.apache.commons.lang3.ArrayUtils;
-import org.apache.lucene.index.DirectoryReader;
-import org.apache.lucene.index.Fields;
-import org.apache.lucene.index.IndexReader;
-import org.apache.lucene.index.MultiFields;
-import org.apache.lucene.index.Term;
-import org.apache.lucene.index.TermsEnum;
-import org.apache.lucene.search.FieldCacheRangeFilter;
-import org.apache.lucene.search.IndexSearcher;
-import org.apache.lucene.search.Query;
-import org.apache.lucene.search.TermQuery;
-import org.apache.lucene.search.TotalHitCountCollector;
-import org.apache.lucene.store.Directory;
-import org.apache.lucene.store.SimpleFSDirectory;
-import org.apache.lucene.util.BytesRef;
 
 /**
  *
@@ -49,17 +17,7 @@ import org.apache.lucene.util.BytesRef;
  */
 public class SAXanalysis {
 
-    public static void saveCluster(HashMap<String, Integer> sax_string_cluster, Map<String, String> termSAXstrings,  String file_name) throws IOException {
-        PrintWriter pw = new PrintWriter(new FileWriter(file_name));
-        String[] term = termSAXstrings.keySet().toArray(new String[termSAXstrings.size()]);
-        String[] sax_string = sax_string_cluster.keySet().toArray(new String[sax_string_cluster.size()]);
-        for (int i = 0; i < sax_string_cluster.size() ; i++) {
-            pw.println( term[i] + " "+ sax_string[i] + " " + sax_string_cluster.get(sax_string[i]));
-        }
-        
-        pw.close();
-        } 
-  
+
      public static void main(String[] args) throws IOException, Exception{
 
         //is the number of letter to consider, basically if it's a is under the median, otherwise it's more
@@ -93,12 +51,13 @@ public class SAXanalysis {
         
         KMeans yes_kmeans = new KMeans(number_yes_cluster,  sax_yes);
         HashMap<String, Integer> yes_kmeans_cluster = yes_kmeans.computeKMeans();
-        saveCluster(yes_kmeans_cluster, sax_yes, output_data_directory + "cluster/yesClusters.txt");
+        KMeans.saveCluster(yes_kmeans_cluster, sax_yes, output_data_directory + "cluster/yesClusters.txt");
         
         KMeans no_kmeans = new KMeans(number_no_cluster,  sax_no);
         HashMap<String, Integer> no_kmeans_cluster = no_kmeans.computeKMeans(); 
-        saveCluster(no_kmeans_cluster,  sax_no, output_data_directory + "cluster/noClusters.txt");
+        KMeans.saveCluster(no_kmeans_cluster,  sax_no, output_data_directory + "cluster/noClusters.txt");
 
+        
 
      }
 }

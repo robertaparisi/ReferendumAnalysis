@@ -5,6 +5,9 @@
  */
 package analysis;
 
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.PrintWriter;
 import static java.lang.Math.floor;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -162,6 +165,16 @@ public class KMeans {
         } while (old_error != new_error);
         return termSAXclusterid;
     }
+    public static void saveCluster(HashMap<String, Integer> sax_string_cluster, Map<String, String> termSAXstrings,  String file_name) throws IOException {
+        PrintWriter pw = new PrintWriter(new FileWriter(file_name));
+        String[] term = termSAXstrings.keySet().toArray(new String[termSAXstrings.size()]);
+        String[] sax_string = sax_string_cluster.keySet().toArray(new String[sax_string_cluster.size()]);
+        for (int i = 0; i < sax_string_cluster.size() ; i++) {
+            pw.println( term[i] + " "+ sax_string[i] + " " + sax_string_cluster.get(sax_string[i]));
+        }
+
+        pw.close();
+    } 
  
    
 }
