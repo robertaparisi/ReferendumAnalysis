@@ -22,7 +22,7 @@
             <artifactId>twitter4j-core</artifactId>
             <version>4.0.6</version>
         </dependency>
-        <dependency>		
+        		
         <dependency>
             <groupId>org.apache.lucene</groupId>
             <artifactId>lucene-analyzers-common</artifactId>
