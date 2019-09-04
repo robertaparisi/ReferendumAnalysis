@@ -16,7 +16,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.NavigableMap;
 import java.util.TreeMap;
-import java.util.TreeSet;
 import net.seninp.jmotif.sax.SAXException;
 import net.seninp.jmotif.sax.SAXProcessor;
 import net.seninp.jmotif.sax.alphabet.NormalAlphabet;
@@ -95,15 +94,12 @@ public class TemporalAnalysis {
 
     public static ArrayList<String>orderedTermFrequencies(IndexReader index_reader, long min_term_frequency) throws IOException { 
         //NavigableMap<Integer, ArrayList<String>> 
-        //i am going to use treemap, since they keep the order if the freequencies, in order to speed up the rest of the work
-        
+        //i am going to use treemap, since they keep the order if the freequencies, in order to speed up the rest of the work        
         NavigableMap<Integer, ArrayList<String>> terms_freq = new TreeMap<>(Collections.reverseOrder());
         Fields fields = MultiFields.getFields(index_reader);
         TermsEnum terms_enum = fields.terms("text").iterator(null);
         System.out.println("Number of terms in the index: " + fields.terms("text").size());
-
         BytesRef bytes_ref;
-
         while ((bytes_ref = terms_enum.next()) != null) {
             String term = bytes_ref.utf8ToString(); 
             int freq = terms_enum.docFreq();//index_reader.docFreq(new Term("text", bytes_ref));
@@ -113,8 +109,7 @@ public class TemporalAnalysis {
                 array_of_terms.addAll(terms_freq.get(freq));
             }            
             terms_freq.put(freq, array_of_terms);
-        }
-        
+        }        
         ArrayList<String> oterms = new ArrayList<>();
         for (Integer f: terms_freq.keySet()) {
             if (f>= min_term_frequency) {
@@ -128,12 +123,11 @@ public class TemporalAnalysis {
                 }
             }
         }
-
         System.out.println("Terms that have minimum lenght 2, at least 1 alphabetic character and that appear at least " + min_term_frequency +" times: " + oterms.size());
-        
     return(oterms);
-
     }
+    
+    
     public static int peak_query(String term, long start, long end, IndexReader index_reader) throws IOException {
         IndexSearcher searcher = new IndexSearcher(index_reader);
         Query query = new TermQuery(new Term("text", term));
@@ -142,6 +136,7 @@ public class TemporalAnalysis {
         searcher.search(query, dateFilter, collector);
         return(collector.getTotalHits());
     }
+    
 
     public static String buildSaxString(ArrayList<Integer> timeSeries, int alphabetSize, double threshold) throws SAXException {
         double[] time_series_array = timeSeries.stream().mapToDouble(Integer::doubleValue).toArray();
@@ -155,30 +150,23 @@ public class TemporalAnalysis {
     
     public static Map<String, String> sax_analyzer(String regex_match, double threshold, ArrayList<Long> time_interval, IndexReader index_reader, long min_term_frequency) throws IOException, SAXException {
         ArrayList<String> terms_freq = orderedTermFrequencies(index_reader, min_term_frequency);
-        
-//        ArrayList<String> terms_freq = orderedTermFrequencies(index_reader);
         Map<String, String> top1000term = new HashMap<>();
-
-//        int i = 0;
-//        int[] printValue = new int[] {100, 1000, 2000, 5000, 6000, 8000, 10000, 12000, 15000, 18000};
-//        for (Integer freq : terms_freq.keySet()) { // per ogni frequenza
-//            if (freq>50){
-            for (String term : terms_freq) { // per ogni parola con quella frequenza   .get(freq){ 
-                    ArrayList<Integer> sax_values_array = new ArrayList<>();
-                    String sax_string;
-                    int sax_values;
-                // la parola deve essere lunga almeno 2 caratteri e deve avere almeno una lettera
-                    for (int p = 1; p <  time_interval.size(); p++) {
-                        sax_values = peak_query(term, time_interval.get(p- 1), time_interval.get(p), index_reader);
-                        sax_values_array.add(sax_values);                   
-                    }
-                    sax_string = buildSaxString(sax_values_array, 2, threshold);
-                    if (sax_string.matches(regex_match)){     
-                        top1000term.put(term, sax_string);
-                        }              
-                if (top1000term.size()==1000){ //se abbiamo raggiunto i 1000 termini ci blocchiamo
-                    break;
-                }
+        for (String term : terms_freq) { // per ogni parola con quella frequenza   .get(freq){ 
+            ArrayList<Integer> sax_values_array = new ArrayList<>();
+            String sax_string;
+            int sax_values;
+        // la parola deve essere lunga almeno 2 caratteri e deve avere almeno una lettera
+            for (int p = 1; p <  time_interval.size(); p++) {
+                sax_values = peak_query(term, time_interval.get(p- 1), time_interval.get(p), index_reader);
+                sax_values_array.add(sax_values);                   
+            }
+            sax_string = buildSaxString(sax_values_array, 2, threshold);
+            if (sax_string.matches(regex_match)){     
+                top1000term.put(term, sax_string);
+                }              
+             if (top1000term.size()==1000){ //se abbiamo raggiunto i 1000 termini ci blocchiamo
+                break;
+            }
         }
         return(top1000term);
     }

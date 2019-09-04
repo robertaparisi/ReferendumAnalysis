@@ -123,7 +123,7 @@ public class KMeans {
     }
    
       
-    private Map<Integer, ArrayList<String>> getClusterMap(HashMap<String, Integer> termSAXclusterid, Map<String, String> termSAXstrings) {
+    public static Map<Integer, ArrayList<String>> getClusterMap(HashMap<String, Integer> termSAXclusterid, Map<String, String> termSAXstrings) {
         Map<Integer, ArrayList<String>> cluster_term = new HashMap<>();
         String[] sax_strings = termSAXclusterid.keySet().toArray(new String[termSAXclusterid.size()]);
         String[] terms = termSAXstrings.keySet().toArray(new String[termSAXstrings.size()]);
@@ -210,16 +210,20 @@ public class KMeans {
     }
     
     
-    public static void saveCluster(HashMap<String, Integer> sax_string_cluster, Map<String, String> termSAXstrings,  String file_name) throws IOException {
-        PrintWriter pw = new PrintWriter(new FileWriter(file_name));
+    public static void saveCluster(HashMap<String, Integer> sax_string_cluster, Map<String, String> termSAXstrings,String group_cluster_filename,  String term_cluster_filename) throws IOException {
+        PrintWriter tc_print = new PrintWriter(new FileWriter(term_cluster_filename));
+        PrintWriter gc_print = new PrintWriter(new FileWriter(group_cluster_filename));
         String[] term = termSAXstrings.keySet().toArray(new String[termSAXstrings.size()]);
         String[] sax_string = sax_string_cluster.keySet().toArray(new String[sax_string_cluster.size()]);
-
+        Map<Integer, ArrayList<String>> cluster_group = getClusterMap(sax_string_cluster, termSAXstrings);
+        String[] cluster_group_key = cluster_group.keySet().toArray(new String[cluster_group.size()]);
         for (int i = 0; i < sax_string_cluster.size() ; i++) {
-            pw.println( term[i] + " "+ sax_string[i] + " " + sax_string_cluster.get(sax_string[i]));
-            
+            tc_print.println( term[i] + " "+ sax_string[i] + " " + sax_string_cluster.get(sax_string[i]));            
         }
-        
+        for (int i = 0; i<= cluster_group.size(); i++){
+            gc_print.println(cluster_group_key[i] + " " + cluster_group.get((int)cluster_group_key[i].chars());
+        }
+        cluster_group_key[i].chars()
 
         pw.close();
     } 

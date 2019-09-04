@@ -7,8 +7,8 @@ import twitter4j.TwitterException;
 
 public class main {
     public static void main(String[] args) throws IOException, ParseException, JSONException, TwitterException, org.apache.lucene.queryparser.classic.ParseException {
-//        Boolean recalculate_general_index = true;
-        Boolean recalculate_general_index = false;
+        Boolean recalculate_general_index = true;
+//        Boolean recalculate_general_index = false;
         Boolean recalculate_yesno_index = true;  
 //        Boolean recalculate_yesno_index = false;
         
