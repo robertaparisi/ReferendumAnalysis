@@ -8,15 +8,13 @@ package analysis;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
-import static java.lang.Math.floor;
+import static java.lang.Math.abs;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.LinkedHashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.Random;
-import java.util.Set;
 import org.apache.commons.lang3.StringUtils;
 
 /**
@@ -31,7 +29,7 @@ public class KMeans {
     private final Map<String, String> termsSAXstring;
     private final Object [] saxStrings;
     private final int saxStringsSize;
-    private final Random rand = new Random(25023);
+    public Random rand = new Random(182); 
 
 
 
@@ -138,30 +136,7 @@ public class KMeans {
         }
         return (cluster_term);
     }
-    
-//    public Map<Integer, ArrayList<String>> bestKMeans() {
-//        
-//        int num_iter = 25;
-//        Map<Integer, ArrayList<String>> cluster_term = new HashMap<>();
-//        List<Double> error = new ArrayList<>();
-//        ArrayList<ArrayList<Double>> centroids = new ArrayList<>();
-//
-//        double distOld = Integer.MAX_VALUE;
-//        double distNew;
-//        for(int iter=0; iter< num_iter; iter++) {
-//            Map<Integer, ArrayList<String>> clusters = computeKMeans();
-//            distNew = clusterDist;
-//            if(distOld>distNew) {
-//                System.out.println("best score:"+distNew);
-//                fclusters = clusters;
-//                distOld = distNew;
-//                centroids = clusterCentroids;
-//            }
-//        }
-//        scores = cScores;
-//        clusterCentroids = centroids;
-//    return(fclusters);
-//}
+
   
     /*
     this function that return an hashmap that contains for each SAX string the id of the cluster to whom 
@@ -171,19 +146,20 @@ public class KMeans {
      */
     public HashMap<String, Integer> computeKMeans() throws Exception {
         int list_size = saxStrings.length;
-        int old_error = 0;
+        int old_error = 100; // just to allow to enter in the while loop
         int new_error = 0; 
         String[] centroids;
-        // clusters is an auxiliary structure that allows indexed access
-        // instantiate the empty clusters (sets) inside the list of clusters
         ArrayList<LinkedHashSet<String>> clusters = new ArrayList<>();
         for (int i = 0; i < k; i++) {
             clusters.add(new LinkedHashSet<>());
         }
         centroids = getKRandomCentroids();
         System.out.println("Centroidi STEP 0: "+ Arrays.toString(centroids));
-        
-        do {
+        int iter = 0;
+        int max_iter = 100;
+        while (abs(old_error - new_error)> 1 & iter<= max_iter){
+            iter++;
+            System.out.println("iter "+ iter);
             old_error = new_error;
             new_error = 0;
             for (int i = 0; i < list_size; i++) {
@@ -204,7 +180,7 @@ public class KMeans {
                 updateCluster(clusters, sax_string, new_cluster);
             }
             centroids = computeCentroids(clusters); // calculate the centroids for the next iteration
-        } while (old_error != new_error);
+        } 
         System.out.println("error: "+ new_error);
         return termSAXclusterid;
     }
@@ -212,20 +188,19 @@ public class KMeans {
     
     public static void saveCluster(HashMap<String, Integer> sax_string_cluster, Map<String, String> termSAXstrings,String group_cluster_filename,  String term_cluster_filename) throws IOException {
         PrintWriter tc_print = new PrintWriter(new FileWriter(term_cluster_filename));
-        PrintWriter gc_print = new PrintWriter(new FileWriter(group_cluster_filename));
         String[] term = termSAXstrings.keySet().toArray(new String[termSAXstrings.size()]);
         String[] sax_string = sax_string_cluster.keySet().toArray(new String[sax_string_cluster.size()]);
         Map<Integer, ArrayList<String>> cluster_group = getClusterMap(sax_string_cluster, termSAXstrings);
-        String[] cluster_group_key = cluster_group.keySet().toArray(new String[cluster_group.size()]);
+        Integer[] cluster_group_key = cluster_group.keySet().toArray(new Integer[cluster_group.size()]);
         for (int i = 0; i < sax_string_cluster.size() ; i++) {
             tc_print.println( term[i] + " "+ sax_string[i] + " " + sax_string_cluster.get(sax_string[i]));            
         }
-        for (int i = 0; i<= cluster_group.size(); i++){
-            gc_print.println(cluster_group_key[i] + " " + cluster_group.get((int)cluster_group_key[i].chars());
+        tc_print.close();
+        PrintWriter gc_print = new PrintWriter(new FileWriter(group_cluster_filename));
+        for (int i = 0; i< cluster_group.size(); i++){
+            gc_print.println(cluster_group_key[i] + " " + cluster_group.get(cluster_group_key[i]));
         }
-        cluster_group_key[i].chars()
-
-        pw.close();
+        gc_print.close();
     } 
  
    

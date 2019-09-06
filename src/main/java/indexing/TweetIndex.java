@@ -40,6 +40,9 @@ import twitter4j.JSONException;
 import twitter4j.JSONObject;
 import org.apache.lucene.store.SimpleFSDirectory;
 import org.apache.lucene.util.Version;
+
+
+
 import static org.apache.lucene.util.Version.LUCENE_41;
 import twitter4j.HashtagEntity;
 import twitter4j.TwitterException;

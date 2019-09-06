@@ -46,6 +46,33 @@ public class Prova {
         
         System.out.println((char)(4.0));
         
+        double rand_num = Math.random();
+//        finalnum = rand_num
+//                .nextInt();
+        String regex_match = "a+a*b+a*b*a*";
+        String sax_string = "aaaaaaaaaaaabbbbaaaaaaaa";
+        String sax_string2 = "aaabbbbaaaabbbbbbaaaaa";
+        
+        if (sax_string.matches(regex_match)){
+            System.out.println("y");
+            
+        }
+        else{
+            System.out.println("n");
+        }
+        
+                
+        if (sax_string2.matches(regex_match)){
+            System.out.println("y");
+            
+        }
+        else{
+            System.out.println("n");
+        }
+        
+                
+        
+
         
     }   
 }   
