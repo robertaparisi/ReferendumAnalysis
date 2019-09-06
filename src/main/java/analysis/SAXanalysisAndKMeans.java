@@ -15,13 +15,13 @@ import java.util.concurrent.TimeUnit;
  *
  * @author Roberta
  */
-public class SAXanalysis {
-
-
-     public static void main(String[] args) throws IOException, Exception{
-
-        //is the number of letter to consider, basically if it's a is under the median, otherwise it's more
-        int alphabet_size = 2; 
+public class SAXanalysisAndKMeans {
+    
+    public static final String cluster_directory = output_data_directory + "cluster/";
+    
+    public static void saxStringAndKMeansComputation(int alphabet_size, int number_no_cluster, int number_yes_cluster) throws  IOException, Exception{
+//     public static void main(String[] args) throws IOException, Exception{
+          
         //for being considered as sax, they need to have 2 peaks, so that's the distribution that they need to match
         String regex_match = "a+a*b*+a*b*a*";// "a+b?bb?a+?a+b?bba*?" troppo restrittivo
         double threshold = 0.5;
@@ -46,17 +46,16 @@ public class SAXanalysis {
         System.out.println("==========================================");
 
 
-        int number_yes_cluster = 13; // n. of yes clusters
-        int number_no_cluster = 13; // n. of no clusters
+        
         
         KMeans yes_kmeans = new KMeans(number_yes_cluster,  sax_yes);
         HashMap<String, Integer> yes_kmeans_cluster = yes_kmeans.computeKMeans();
-        KMeans.saveCluster(yes_kmeans_cluster, sax_yes, output_data_directory + "cluster/yesClusterListGroup.txt",output_data_directory + "cluster/yesClusters.txt" );
+        KMeans.saveCluster(yes_kmeans_cluster, sax_yes, cluster_directory + "yesClusterListGroup.txt", cluster_directory + "yesClusters.txt" );
         
         
         KMeans no_kmeans = new KMeans(number_no_cluster,  sax_no);
         HashMap<String, Integer> no_kmeans_cluster = no_kmeans.computeKMeans(); 
-        KMeans.saveCluster(no_kmeans_cluster,  sax_no,output_data_directory + "cluster/noClusterListGroup.txt", output_data_directory + "cluster/noClusters.txt");
+        KMeans.saveCluster(no_kmeans_cluster,  sax_no, cluster_directory + "noClusterListGroup.txt", cluster_directory + "noClusters.txt");
 
         
 
