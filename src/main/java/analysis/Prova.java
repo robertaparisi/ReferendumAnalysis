@@ -5,35 +5,12 @@
  */
 package analysis;
 
-import static analysis.CooccurenceGraph.lessFrequentTermFrequency;
 import static analysis.SAXanalysisAndKMeans.cluster_directory;
-import static indexing.TweetIndex.output_data_directory;
-import static indexing.TweetIndex.tweets_index_directory;
-import java.awt.List;
 import java.io.BufferedReader;
-import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.LinkedHashSet;
-import static jdk.nashorn.internal.objects.NativeString.substring;
-import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.lucene.analysis.Analyzer;
-import org.apache.lucene.analysis.it.ItalianAnalyzer;
-import org.apache.lucene.index.IndexReader;
-import org.apache.lucene.queryparser.classic.ParseException;
-import org.apache.lucene.queryparser.classic.QueryParser;
-import org.apache.lucene.search.BooleanClause;
-import org.apache.lucene.search.BooleanQuery;
-import org.apache.lucene.search.IndexSearcher;
-import org.apache.lucene.search.Query;
-import org.apache.lucene.search.TotalHitCountCollector;
-import org.apache.lucene.store.Directory;
-import org.apache.lucene.store.SimpleFSDirectory;
-import org.apache.lucene.util.Version;
-import static org.apache.lucene.util.Version.LUCENE_41;
 
 /**
  *
@@ -107,18 +84,21 @@ public class Prova {
         System.out.println(values);
         
 
-//        String cluster = cluster_directory + "yesClusterListGroup.txt"; 
-//        BufferedReader br = new BufferedReader(new FileReader(cluster)); 
-//        String[] lines_cluster = new String[13];
-//        for (int i = 0; i<13; i++){
-//            String cluster_terms = br.readLine();
-//            String just_terms = cluster_terms.replace(cluster_terms.split(", ")[0].split(" ")[0], "");
-//            String[] new_row = just_terms.substring(2, just_terms.length()-1 ).split(", ");
-//            for (int j = 0; j<new_row.length;j++){
-//                String term1 = new_row[j];
-//                System.out.println(term1);
-//            }
-//           
+        String cluster = cluster_directory + "yesClusterListGroup.txt"; 
+        BufferedReader br = new BufferedReader(new FileReader(cluster)); 
+        String[] lines_cluster = new String[13];
+        for (int i = 0; i<13; i++){
+            String cluster_terms = br.readLine();
+            System.out.println(cluster_terms);
+            
+            String just_terms = cluster_terms.replace(cluster_terms.split(", ")[0].split(" ")[0]+" ", "");
+            System.out.println(just_terms);
+            String[] new_row = just_terms.substring(1, just_terms.length()-1 ).split(", ");
+            for (int j = 0; j<new_row.length;j++){
+                String term1 = new_row[j];
+                System.out.println(term1);
+            }
+           
         }
            
         

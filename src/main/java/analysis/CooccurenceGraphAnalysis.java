@@ -26,23 +26,19 @@ public class CooccurenceGraphAnalysis {
                 
         System.out.println("====================================================");
         System.out.println("YES SIDE CO-OCCURENCE GRAPHS COMPUTATION");
+        System.out.println(" ");
         String yes_cluster_filename = cluster_directory + "yesClusterListGroup.txt";
         String semi_filename_yes = "yes_side/yes_cooccurence_graph_cluster";
-        CooccurenceGraph.createCoOccurenceGraphs(output_data_directory+ "yes_politicians_index",thresholdLFT, thresholdTotal,yes_cluster_filename,semi_filename_yes , k);
-      
+        CooccurenceGraphs.createCoOccurenceGraphs(output_data_directory+ "yes_politicians_index",thresholdLFT, thresholdTotal,yes_cluster_filename,semi_filename_yes , k);
+        
         System.out.println("====================================================");
         System.out.println("NO SIDE CO-OCCURENCE GRAPHS COMPUTATION");
         String no_cluster_filename = cluster_directory + "noClusterListGroup.txt";
         String semi_filename_no = "no_side/no_cooccurence_graph_cluster";
-        CooccurenceGraph.createCoOccurenceGraphs(output_data_directory+ "no_politicians_index", thresholdLFT, thresholdTotal, no_cluster_filename,semi_filename_no, k);
+        CooccurenceGraphs.createCoOccurenceGraphs(output_data_directory+ "no_politicians_index", thresholdLFT, thresholdTotal, no_cluster_filename,semi_filename_no, k);
         
     }
 }
-   
-//            
-//    String[] cluster_list, String dir,  String file_name) throws IOException, ParseException{       
-//        WeightedUndirectedGraph graph = new WeightedUndirectedGraph(cluster_list.length); 
-        
-    
+ 
     
 

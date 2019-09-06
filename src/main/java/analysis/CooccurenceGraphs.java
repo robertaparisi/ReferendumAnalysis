@@ -4,7 +4,6 @@
  * and open the template in the editor.
  */
 package analysis;
-import static analysis.SAXanalysisAndKMeans.cluster_directory;
 import static indexing.TweetIndex.output_data_directory;
 import it.stilo.g.structures.WeightedUndirectedGraph;
 import java.io.BufferedReader;
@@ -37,7 +36,7 @@ import static org.apache.lucene.util.Version.LUCENE_41;
  *
  * @author Roberta
  */
-public class CooccurenceGraph {   
+public class CooccurenceGraphs {   
     
     public static final String cooccurence_graph_directory = output_data_directory + "cooccurence_graphs/";
     public static void writeCoocurrenceGraph(ArrayList<String> nodes1, ArrayList<String> nodes2, ArrayList<Integer> weights, String file_name)throws IOException {
@@ -51,7 +50,7 @@ public class CooccurenceGraph {
     public static int countCoOccurrence (String t1, String t2, IndexReader index_reader) throws ParseException, IOException{
         IndexSearcher searcher = new IndexSearcher(index_reader);
         Analyzer analyzer = new ItalianAnalyzer(Version.LUCENE_41);
-        QueryParser parser = new QueryParser(LUCENE_41, "term", analyzer);
+        QueryParser parser = new QueryParser(LUCENE_41, "text", analyzer);
         Query q1 = parser.parse(t1);
         Query q2 = parser.parse(t2);
         BooleanQuery query = new BooleanQuery();
@@ -76,7 +75,7 @@ public class CooccurenceGraph {
     
     public static int lessFrequentTermFrequency (String term1, String term2,IndexReader index_reader) throws ParseException, IOException{
         int frequency_term1 = countOccurence(term1, index_reader);
-        int frequency_term2 = countOccurence(term2, index_reader);
+        int frequency_term2 = countOccurence(term2, index_reader);    
         if (frequency_term1 >= frequency_term2){
             return (frequency_term2);
         }
@@ -93,9 +92,7 @@ public class CooccurenceGraph {
     
     public static double normalizeCooccurence(int weight, String term1, String term2,IndexReader index_reader  ) throws IOException, ParseException{
         int frequency_term1 = countOccurence(term1, index_reader);
-//        System.out.println(frequency_term1);
         int frequency_term2 = countOccurence(term2, index_reader);
-//        System.out.println(frequency_term2);
         double new_weight = weight/(frequency_term1+frequency_term2);
         return(new_weight);
     }
@@ -119,14 +116,12 @@ public class CooccurenceGraph {
         ArrayList<String> nodes2 = new ArrayList<>();
         ArrayList<Integer> weights = new  ArrayList<>(); 
         System.out.println("Starting term analysis for the cluster");
-        for (int i = 0; i < cluster_list.length; i++){
-            System.out.println("....");
+        for (int i = 0; i < cluster_list.length-1; i++){
             String term1 = cluster_list[i];
-            for (int j = i + 1; i < cluster_list.length + 1; i++){
-                String term2 = cluster_list[i];
+            for (int j = i + 1; j < cluster_list.length; j++){
+                String term2 = cluster_list[j];
                 int cooccurence = countCoOccurrence (term1, term2, index_reader);
-                double normalized_cooccurence = normalizeCooccurence(cooccurence, term1, term2, index_reader);                
-//                int  = computeThreshold(term1, term2, threshold, index_reader);
+                double normalized_cooccurence = normalizeCooccurence(cooccurence, term1, term2, index_reader);  
                 boolean clauses_respected = checkThresholdClauses(cooccurence, normalized_cooccurence, term1, term2, thresholdLFT, thresholdTotal, index_reader);
                 if (clauses_respected){
                     graph.add(i,j, cooccurence);
@@ -137,6 +132,8 @@ public class CooccurenceGraph {
             }    
         }
         System.out.println("done, let's save the graph");
+        System.out.println(" ");
+        System.out.println(" ");
         writeCoocurrenceGraph(nodes1, nodes2, weights, file_name);
         return(graph);//serve?
     }
@@ -149,17 +146,14 @@ public class CooccurenceGraph {
     yes and the no side. 
     */
     public static void createCoOccurenceGraphs(String index_dir, double thresholdLFT, double thresholdTotal, String cluster_name_file,String cooccurence_filename, int k) throws IOException, ParseException{
-        
-        
- 
         BufferedReader br = new BufferedReader(new FileReader(cluster_name_file)); 
         int cluster_id = 0;
         String new_row;
         while((new_row = br.readLine())!=null){
             System.out.println("Computing co-occurence graph for cluster "+cluster_id);
             String filename = cooccurence_graph_directory + cooccurence_filename + cluster_id + ".txt";
-            String just_terms = new_row.replace(new_row.split(", ")[0].split(" ")[0], "");
-            String[] cluster_list = just_terms.substring(2, just_terms.length()-1 ).split(", ");
+            String just_terms = new_row.replace(new_row.split(", ")[0].split(" ")[0]+ " ", "");
+            String[] cluster_list = just_terms.substring(1, just_terms.length()-1 ).split(", ");
             WeightedUndirectedGraph graph =createCoOccurrenceGraphCluster(cluster_list, index_dir, thresholdLFT, thresholdTotal, filename);
             cluster_id++;
         }         

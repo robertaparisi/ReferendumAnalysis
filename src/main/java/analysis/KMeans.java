@@ -134,6 +134,7 @@ public class KMeans {
             }
             cluster_term.put(cluster, t);
         }
+       
         return (cluster_term);
     }
 
