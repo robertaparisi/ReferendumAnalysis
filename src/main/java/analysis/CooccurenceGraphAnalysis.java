@@ -19,7 +19,7 @@ public class CooccurenceGraphAnalysis {
     
 
         
-    public static void main(String[] args) throws IOException, ParseException{
+    public static void main(String[] args) throws IOException, ParseException, InterruptedException{
         double thresholdLFT = 0.3;
         double thresholdTotal = 0.1;
         int k = 13;
@@ -28,14 +28,18 @@ public class CooccurenceGraphAnalysis {
         System.out.println("YES SIDE CO-OCCURENCE GRAPHS COMPUTATION");
         System.out.println(" ");
         String yes_cluster_filename = cluster_directory + "yesClusterListGroup.txt";
-        String semi_filename_yes = "yes_side/yes_cooccurence_graph_cluster";
-        CooccurenceGraphs.createCoOccurenceGraphs(output_data_directory+ "yes_politicians_index",thresholdLFT, thresholdTotal,yes_cluster_filename,semi_filename_yes , k);
+        String yes_kcore_filename = "yes_side/yesKCore.txt";
+        String yes_cc_filename = "yes_side/yesCC.txt";
+        String semi_filename_yes = "yes_side/yes_cooccurence_graph_cluster.txt";
+        CooccurenceGraphs.createCoOccurenceGraphsCCandKCORE(output_data_directory+ "yes_politicians_index",thresholdLFT, thresholdTotal,yes_cluster_filename,semi_filename_yes , k, yes_cc_filename, yes_kcore_filename);
         
         System.out.println("====================================================");
         System.out.println("NO SIDE CO-OCCURENCE GRAPHS COMPUTATION");
         String no_cluster_filename = cluster_directory + "noClusterListGroup.txt";
-        String semi_filename_no = "no_side/no_cooccurence_graph_cluster";
-        CooccurenceGraphs.createCoOccurenceGraphs(output_data_directory+ "no_politicians_index", thresholdLFT, thresholdTotal, no_cluster_filename,semi_filename_no, k);
+        String no_kcore_filename =  "no_side/noKCore.txt";
+        String no_cc_filename = "no_side/noCC.txt";
+        String semi_filename_no = "no_side/no_cooccurence_graph_cluster.txt";
+        CooccurenceGraphs.createCoOccurenceGraphsCCandKCORE(output_data_directory+ "no_politicians_index", thresholdLFT, thresholdTotal, no_cluster_filename,semi_filename_no, k, no_cc_filename, no_kcore_filename);
         
     }
 }

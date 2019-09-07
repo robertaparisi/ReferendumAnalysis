@@ -4,7 +4,11 @@
  * and open the template in the editor.
  */
 package analysis;
+import static analysis.GraphAnalysis.runner;
 import static indexing.TweetIndex.output_data_directory;
+import it.stilo.g.algo.CoreDecomposition;
+import it.stilo.g.algo.SubGraph;
+import it.stilo.g.structures.Core;
 import it.stilo.g.structures.WeightedUndirectedGraph;
 import java.io.BufferedReader;
 import java.io.File;
@@ -13,6 +17,8 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Set;
 import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.analysis.it.ItalianAnalyzer;
 import org.apache.lucene.index.DirectoryReader;
@@ -39,13 +45,7 @@ import static org.apache.lucene.util.Version.LUCENE_41;
 public class CooccurenceGraphs {   
     
     public static final String cooccurence_graph_directory = output_data_directory + "cooccurence_graphs/";
-    public static void writeCoocurrenceGraph(ArrayList<String> nodes1, ArrayList<String> nodes2, ArrayList<Integer> weights, String file_name)throws IOException {
-        try (PrintWriter pw = new PrintWriter(new FileWriter(file_name))) {
-            for (int i = 0; i < nodes1.size() ; i++) {
-                pw.println( nodes1.get(i) + " "+ nodes2.get(i) + " " + weights.get(i));
-            }
-        }
-    }      
+  
          
     public static int countCoOccurrence (String t1, String t2, IndexReader index_reader) throws ParseException, IOException{
         IndexSearcher searcher = new IndexSearcher(index_reader);
@@ -102,13 +102,13 @@ public class CooccurenceGraphs {
         // OR if the weight (double) is at least equal to 0.1 (thresholdTotal = 0.1)that means that this word appear togheter 1 times over 10
         int less_freq_term_threshold = computeLessFreqTermThreshold(term1, term2, thresholdLFT, index_reader);
         int min_num_cooccurence = (int) (less_freq_term_threshold*thresholdLFT);
-        boolean clause_respected = coOccurence>= min_num_cooccurence | weight>=thresholdTotal;
+        boolean clause_respected = coOccurence!=0 & (coOccurence>= min_num_cooccurence | weight>=thresholdTotal);
         return(clause_respected);
         
     }
     
   
-    public static WeightedUndirectedGraph createCoOccurrenceGraphCluster (String[] cluster_list, String index_dir, double thresholdLFT, double thresholdTotal,  String file_name) throws IOException, ParseException{       
+    public static WeightedUndirectedGraph createCoOccurrenceGraphCluster (PrintWriter pw, String[] cluster_list, String index_dir, double thresholdLFT, double thresholdTotal) throws IOException, ParseException{       
         WeightedUndirectedGraph graph = new WeightedUndirectedGraph(cluster_list.length); 
         File directory = new File(index_dir);
         IndexReader index_reader = DirectoryReader.open(FSDirectory.open(directory));
@@ -123,21 +123,69 @@ public class CooccurenceGraphs {
                 int cooccurence = countCoOccurrence (term1, term2, index_reader);
                 double normalized_cooccurence = normalizeCooccurence(cooccurence, term1, term2, index_reader);  
                 boolean clauses_respected = checkThresholdClauses(cooccurence, normalized_cooccurence, term1, term2, thresholdLFT, thresholdTotal, index_reader);
-                if (clauses_respected){
+                if (clauses_respected){                
                     graph.add(i,j, cooccurence);
-                    nodes1.add(term1);
-                    nodes2.add(term2);
-                    weights.add(cooccurence);
+                    System.out.println("+++++++++++++++++++");
+                    pw.println(term1 + " "+ term2 + " " + cooccurence);
+//                    nodes1.add(term1);
+//                    nodes2.add(term2);
+//                    weights.add(cooccurence);
                 }              
             }    
         }
         System.out.println("done, let's save the graph");
         System.out.println(" ");
         System.out.println(" ");
-        writeCoocurrenceGraph(nodes1, nodes2, weights, file_name);
+//        writeCoocurrenceGraph(nodes1, nodes2, weights, file_name);
+//        for (int i = 0; i < nodes1.size() ; i++) {
+//                pw.println(nodes1.get(i) + " "+ nodes2.get(i) + " " + weights.get(i));
+//        }
         return(graph);//serve?
     }
     
+//    
+//    public static void writeCoocurrenceGraph(ArrayList<String> nodes1, ArrayList<String> nodes2, ArrayList<Integer> weights, String file_name)throws IOException {
+//        try ()) {
+//            for (int i = 0; i < nodes1.size() ; i++) {
+//                pw.println( nodes1.get(i) + " "+ nodes2.get(i) + " " + weights.get(i));
+//            }
+//        }
+//    }    
+//    
+    
+    
+        
+    public static void extractANDsaveCCandKCore (PrintWriter cc_pw, PrintWriter kcore_pw, String[] cluster_terms, WeightedUndirectedGraph graph) throws InterruptedException, IOException {       
+        int[] nodes_list = new int[graph.size];
+        for (int i = 0; i < graph.size; i++) {
+            nodes_list[i] = i;
+        }
+        
+        Set<Set<Integer>> connected_components = it.stilo.g.algo.ConnectedComponents.rootedConnectedComponents(graph, nodes_list, runner);   
+        System.out.println("Connecte components:         " + connected_components);
+        for (Set<Integer> component : connected_components) {   
+            String[] cc_nodes = new String[component.size()];
+            Integer[] cc_array = component.toArray(new Integer[component.size()]);
+            for (int node_id =0; node_id< component.size(); node_id++) {                
+                cc_nodes[node_id] = cluster_terms[cc_array[node_id]];
+            }   
+            cc_pw.println(Arrays.toString(cc_nodes));
+            
+            WeightedUndirectedGraph graphComp = SubGraph.extract(graph, component.stream().mapToInt(i->i).toArray(), runner); 
+            Core kcore = CoreDecomposition.getInnerMostCore(graphComp, 2);                
+            System.out.println("K CORE");
+            System.out.println("k: " + kcore.minDegree); //il numero k e' il numero di degree minore in questa subgraph
+//            System.out.println("seq   " + Arrays.toString(kcore.seq) );
+            String[] kcore_nodes = new String[kcore.seq.length];
+            for (int node_id =0; node_id< kcore.seq.length; node_id++) {                
+                kcore_nodes[node_id] = cluster_terms[kcore.seq[node_id]];
+            }   
+            kcore_pw.println(Arrays.toString(kcore_nodes));
+        }       
+//        int[] nodes_subgraph =  largest_component.stream().mapToInt(i->i).toArray();
+//        WeightedUndirectedGraph sub_graph = it.stilo.g.algo.SubGraph.extract(graph, nodes_subgraph, runner);
+//        return (sub_graph);
+    }
     
     /*
     I took as input the file with the Cluster ID and the list of term
@@ -145,18 +193,34 @@ public class CooccurenceGraphs {
     and the no goup. In input is needed also the index dir (that will be different for the
     yes and the no side. 
     */
-    public static void createCoOccurenceGraphs(String index_dir, double thresholdLFT, double thresholdTotal, String cluster_name_file,String cooccurence_filename, int k) throws IOException, ParseException{
+    public static void createCoOccurenceGraphsCCandKCORE(String index_dir, double thresholdLFT, double thresholdTotal, String cluster_name_file,String cooccurence_filename, int k, String cc_filename, String kcore_filename) throws IOException, ParseException, InterruptedException{
+        PrintWriter cc_pw = new PrintWriter(new FileWriter(cooccurence_graph_directory + cc_filename));
+        PrintWriter kcore_pw = new PrintWriter(new FileWriter(cooccurence_graph_directory + kcore_filename));
+        PrintWriter cooccurence_pw = new PrintWriter(new FileWriter(cooccurence_graph_directory + cooccurence_filename));
         BufferedReader br = new BufferedReader(new FileReader(cluster_name_file)); 
         int cluster_id = 0;
         String new_row;
+//        String filename =  ;        
         while((new_row = br.readLine())!=null){
+            cooccurence_pw.println("Cluster ID: " +cluster_id);
+            kcore_pw.println("Cluster ID: " +cluster_id);
+            cc_pw.println("Cluster ID: " +cluster_id);
             System.out.println("Computing co-occurence graph for cluster "+cluster_id);
-            String filename = cooccurence_graph_directory + cooccurence_filename + cluster_id + ".txt";
+//            String filename = cooccurence_graph_directory + cooccurence_filename + cluster_id + ".txt";
+            
             String just_terms = new_row.replace(new_row.split(", ")[0].split(" ")[0]+ " ", "");
             String[] cluster_list = just_terms.substring(1, just_terms.length()-1 ).split(", ");
-            WeightedUndirectedGraph graph =createCoOccurrenceGraphCluster(cluster_list, index_dir, thresholdLFT, thresholdTotal, filename);
+            WeightedUndirectedGraph graph =createCoOccurrenceGraphCluster(cooccurence_pw,cluster_list, index_dir, thresholdLFT, thresholdTotal);
+            extractANDsaveCCandKCore(cc_pw, kcore_pw, cluster_list, graph);
+            
             cluster_id++;
+            cooccurence_pw.println("------------------------------------");
+            cc_pw.println("------------------------------------");
+            kcore_pw.println("------------------------------------");          
         }         
+        cooccurence_pw.close();
+        kcore_pw.close();
+        cc_pw.close();
     }
 
 }
