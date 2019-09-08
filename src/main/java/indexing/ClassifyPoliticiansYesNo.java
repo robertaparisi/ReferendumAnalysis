@@ -49,36 +49,24 @@ public class ClassifyPoliticiansYesNo {
         
         IndexReader index_reader = DirectoryReader.open(dir);
         IndexSearcher searcher = new IndexSearcher(index_reader);
-        
-            
-        
         BooleanQuery yes = new BooleanQuery();
-        
         for (String tag : yes_tags) {
             Query query_term = new TermQuery(new Term("hashtags", tag));
 
             yes.add(query_term, BooleanClause.Occur.SHOULD);
         }
-
-        
         BooleanQuery no = new BooleanQuery();
         for (String tag : no_tags) {
             Query query_term = new TermQuery(new Term("hashtags", tag));
             no.add(query_term, BooleanClause.Occur.SHOULD);
-        }        
-                
-        TotalHitCountCollector collector;
-               
+        }          
+        TotalHitCountCollector collector;    
         Query q;
         List<String> yes_politicians = new ArrayList<>();
         List<String> no_politicians = new ArrayList<>();
         Map<String, List<String>> yes_no_hashmap  = new HashMap<>();
-        
         for (String politician: politicians) {
-            
-            
             q = new TermQuery(new Term("screenname", politician));
-            
             BooleanQuery qyes = new BooleanQuery();
             qyes.add(yes, BooleanClause.Occur.MUST);
             qyes.add(q, BooleanClause.Occur.MUST);

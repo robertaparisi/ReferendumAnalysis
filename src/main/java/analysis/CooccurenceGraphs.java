@@ -5,6 +5,7 @@
  */
 package analysis;
 import static analysis.GraphAnalysis.runner;
+import static analysis.SAXanalysisAndKMeans.cluster_directory;
 import static indexing.TweetIndex.output_data_directory;
 import it.stilo.g.algo.CoreDecomposition;
 import it.stilo.g.algo.SubGraph;
@@ -45,7 +46,7 @@ import static org.apache.lucene.util.Version.LUCENE_41;
 public class CooccurenceGraphs {   
     
     public static final String cooccurence_graph_directory = output_data_directory + "cooccurence_graphs/";
-  
+    public static int runner = (int) (Runtime.getRuntime().availableProcessors());
          
     public static int countCoOccurrence (String t1, String t2, IndexReader index_reader) throws ParseException, IOException{
         IndexSearcher searcher = new IndexSearcher(index_reader);
@@ -127,19 +128,12 @@ public class CooccurenceGraphs {
                     graph.add(i,j, cooccurence);
                     System.out.println("+++++++++++++++++++");
                     pw.println(term1 + " "+ term2 + " " + cooccurence);
-//                    nodes1.add(term1);
-//                    nodes2.add(term2);
-//                    weights.add(cooccurence);
                 }              
             }    
         }
         System.out.println("done, let's save the graph");
         System.out.println(" ");
         System.out.println(" ");
-//        writeCoocurrenceGraph(nodes1, nodes2, weights, file_name);
-//        for (int i = 0; i < nodes1.size() ; i++) {
-//                pw.println(nodes1.get(i) + " "+ nodes2.get(i) + " " + weights.get(i));
-//        }
         return(graph);//serve?
     }
     
@@ -221,6 +215,29 @@ public class CooccurenceGraphs {
         cooccurence_pw.close();
         kcore_pw.close();
         cc_pw.close();
+    }
+       public static void getCoOccurenceGraphCCandKCore(int number_no_cluster, int number_yes_cluster,double thresholdLFT, double thresholdTotal) throws IOException, ParseException, InterruptedException{
+//        double thresholdLFT = 0.3;
+//        double thresholdTotal = 0.1;
+//        int k = 13;
+//                
+        System.out.println("====================================================");
+        System.out.println("YES SIDE CO-OCCURENCE GRAPHS COMPUTATION");
+        System.out.println(" ");
+        String yes_cluster_filename = cluster_directory + "yesClusterListGroup.txt";
+        String yes_kcore_filename = "yes_side/yesKCore.txt";
+        String yes_cc_filename = "yes_side/yesCC.txt";
+        String semi_filename_yes = "yes_side/yes_cooccurence_graph_cluster.txt";
+        createCoOccurenceGraphsCCandKCORE(output_data_directory+ "yes_politicians_index",thresholdLFT, thresholdTotal,yes_cluster_filename,semi_filename_yes ,  number_yes_cluster, yes_cc_filename, yes_kcore_filename);
+        
+        System.out.println("====================================================");
+        System.out.println("NO SIDE CO-OCCURENCE GRAPHS COMPUTATION");
+        String no_cluster_filename = cluster_directory + "noClusterListGroup.txt";
+        String no_kcore_filename =  "no_side/noKCore.txt";
+        String no_cc_filename = "no_side/noCC.txt";
+        String semi_filename_no = "no_side/no_cooccurence_graph_cluster.txt";
+        createCoOccurenceGraphsCCandKCORE(output_data_directory+ "no_politicians_index", thresholdLFT, thresholdTotal, no_cluster_filename,semi_filename_no, number_no_cluster, no_cc_filename, no_kcore_filename);
+        
     }
 
 }
