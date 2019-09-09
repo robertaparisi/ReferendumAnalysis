@@ -145,15 +145,22 @@ public class Prova {
 //        user_no_pw.close();
         
         
-//        String filename = "src/main/resources/data/provafile1.txt";
-//        BufferedReader br = new BufferedReader(new FileReader(filename)); 
-//        String users = br.readLine();//.split(",");
-//        String[] users_list = users.substring(1, users.length()-1).split(", ");
+        String filename = "src/main/resources/data/yes_user.txt";
+        BufferedReader br = new BufferedReader(new FileReader(filename)); 
+        String users = br.readLine();//.split(",");
+        String[] users_list = users.split(", ");//.substring(1, users.length()-1)
+        int i = 0;
+        for(String u: users_list){
+            i++;
+            System.out.println(u);
+            
+        }
+        System.out.println(i);
 //
 //        
           
         
-
+        
         
             
         

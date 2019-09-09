@@ -4,7 +4,6 @@
  * and open the template in the editor.
  */
 package analysis;
-import static analysis.GraphAnalysis.runner;
 import static analysis.SAXanalysisAndKMeans.cluster_directory;
 import static indexing.TweetIndex.output_data_directory;
 import it.stilo.g.algo.CoreDecomposition;
@@ -126,7 +125,6 @@ public class CooccurenceGraphs {
                 boolean clauses_respected = checkThresholdClauses(cooccurence, normalized_cooccurence, term1, term2, thresholdLFT, thresholdTotal, index_reader);
                 if (clauses_respected){                
                     graph.add(i,j, cooccurence);
-                    System.out.println("+++++++++++++++++++");
                     pw.println(term1 + " "+ term2 + " " + cooccurence);
                 }              
             }    
@@ -136,16 +134,6 @@ public class CooccurenceGraphs {
         System.out.println(" ");
         return(graph);//serve?
     }
-    
-//    
-//    public static void writeCoocurrenceGraph(ArrayList<String> nodes1, ArrayList<String> nodes2, ArrayList<Integer> weights, String file_name)throws IOException {
-//        try ()) {
-//            for (int i = 0; i < nodes1.size() ; i++) {
-//                pw.println( nodes1.get(i) + " "+ nodes2.get(i) + " " + weights.get(i));
-//            }
-//        }
-//    }    
-//    
     
     
         
@@ -161,7 +149,7 @@ public class CooccurenceGraphs {
             String[] cc_nodes = new String[component.size()];
             Integer[] cc_array = component.toArray(new Integer[component.size()]);
             for (int node_id =0; node_id< component.size(); node_id++) {                
-                cc_nodes[node_id] = cluster_terms[cc_array[node_id]];
+                cc_nodes[node_id] = cluster_terms[node_id];
             }   
             cc_pw.println(Arrays.toString(cc_nodes));
             

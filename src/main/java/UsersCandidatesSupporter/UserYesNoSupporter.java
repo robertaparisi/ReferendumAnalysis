@@ -73,20 +73,11 @@ public class UserYesNoSupporter {
     
 
  
-    public static Map<String, List<String>> classifyUsers(String[] politicians) throws IOException, org.apache.lucene.queryparser.classic.ParseException  {
-        
-        
+    public static Map<String, List<String>> classifyUsers(String[] yes_politicians, String[] no_politicians) throws IOException, org.apache.lucene.queryparser.classic.ParseException  {
+                
         IndexReader index_reader = DirectoryReader.open(FSDirectory.open(new File(TweetIndex.tweets_index_directory)));
         IndexSearcher searcher = new IndexSearcher(index_reader); 
-        
-        String filename_yes = "src/main/resources/data/yes_politicians.txt";
-        BufferedReader br_yes = new BufferedReader(new FileReader(filename_yes)); 
-        String[] yes_politicians = br_yes.readLine().split(",");
-        
-        String filename_no = "src/main/resources/data/no_politicians.txt";
-        BufferedReader br_no = new BufferedReader(new FileReader(filename_no)); 
-        String[] no_politicians = br_no.readLine().split(",");  
-        
+               
         BooleanQuery yes_tag = new BooleanQuery();
         for (String tag : yes_tags) {
             Query query_term = new TermQuery(new Term("hashtags", tag));
@@ -124,9 +115,12 @@ public class UserYesNoSupporter {
         int total_yes_tweets = 0;
         int total_no_tweets = 0;
         
+        int count_user = 0;
         
         
-        for (String user : user_id) {        
+        for (String user : user_id) {   
+            count_user++;
+            System.out.println("User id: " + count_user);
             BytesRef ref = new BytesRef();
             NumericUtils.longToPrefixCoded(Long.parseLong(user), 0, ref);
             q = new TermQuery(new Term("id", ref));
@@ -172,24 +166,25 @@ public class UserYesNoSupporter {
                 if ((yes_tag_count > no_tag_count & yes_pol_mention_count > no_pol_mention_count) |
                         (yes_tag_count + yes_pol_mention_count > no_tag_count+ no_pol_mention_count)) {
                     yes_supporters.add(user);
-//                    q_yes_tweets.add(q, BooleanClause.Occur.MUST);
-//                    collector = new TotalHitCountCollector();
+
                     TopDocs top_documents = searcher.search(q, Integer.MAX_VALUE);
                     ScoreDoc[] hits = top_documents.scoreDocs;
-                    int num_tweets = hits.length;
-                    total_yes_tweets += num_tweets;
+                    total_yes_tweets += hits.length; //add new number of tweets
                 } 
-                else if (yes_tag_count + yes_pol_mention_count < no_tag_count+ no_pol_mention_count){
+                else if ((yes_tag_count < no_tag_count & yes_pol_mention_count < no_pol_mention_count) |
+                        (yes_tag_count + yes_pol_mention_count < no_tag_count+ no_pol_mention_count)){
                     no_supporters.add(user);
                     
                     TopDocs top_documents = searcher.search(q, Integer.MAX_VALUE);
                     ScoreDoc[] hits = top_documents.scoreDocs;
-                    int num_tweets = hits.length;
-                    total_no_tweets +=num_tweets;
+                    total_no_tweets += hits.length;//add new number of tweets
                 }
             }
             
         }    
+        System.out.println("Number of tweets for no supporters"+ total_no_tweets);
+        System.out.println("Number of tweets for yes supporters"+ total_yes_tweets);
+        
         yes_no_hashmap.put("yes", yes_supporters);
         yes_no_hashmap.put("no", no_supporters);
             
@@ -201,15 +196,21 @@ public class UserYesNoSupporter {
     
     
     public static void main(String[] args) throws FileNotFoundException, IOException, ParseException{
-        String filename = "src/main/resources/data/yes_politicians.txt";
-        BufferedReader br = new BufferedReader(new FileReader(filename)); 
-        String[] politicians = br.readLine().split(",");
-        Map<String, List<String>> supporters = classifyUsers(politicians);
+        
+        String filename_yes = "src/main/resources/data/yes_politicians.txt";
+        BufferedReader br_yes = new BufferedReader(new FileReader(filename_yes)); 
+        String[] yes_politicians = br_yes.readLine().split(",");
+        
+        String filename_no = "src/main/resources/data/no_politicians.txt";
+        BufferedReader br_no = new BufferedReader(new FileReader(filename_no)); 
+        String[] no_politicians = br_no.readLine().split(",");  
+        
+        Map<String, List<String>> supporters = classifyUsers(yes_politicians, no_politicians);
         System.out.println("Done with classification, let's save the two list");
         PrintWriter user_yes_pw = new PrintWriter(new FileWriter("src/main/resources/data/yes_user.txt"));
         user_yes_pw.println(supporters.get("yes"));
         user_yes_pw.close();
-        PrintWriter user_no_pw = new PrintWriter(new FileWriter("src/main/resources/data/yes_user.txt"));
+        PrintWriter user_no_pw = new PrintWriter(new FileWriter("src/main/resources/data/no_user.txt"));
         user_no_pw.println(supporters.get("no"));
         user_no_pw.close();
         
