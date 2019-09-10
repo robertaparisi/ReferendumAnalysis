@@ -182,8 +182,8 @@ public class UserYesNoSupporter {
             }
             
         }    
-        System.out.println("Number of tweets for no supporters"+ total_no_tweets);
-        System.out.println("Number of tweets for yes supporters"+ total_yes_tweets);
+        System.out.println("Number of tweets for no supporters "+ total_no_tweets);
+        System.out.println("Number of tweets for yes supporters "+ total_yes_tweets);
         
         yes_no_hashmap.put("yes", yes_supporters);
         yes_no_hashmap.put("no", no_supporters);
@@ -195,7 +195,7 @@ public class UserYesNoSupporter {
     
     
     
-    public static void main(String[] args) throws FileNotFoundException, IOException, ParseException{
+    public static void createUserClassification() throws FileNotFoundException, IOException, ParseException{
         
         String filename_yes = "src/main/resources/data/yes_politicians.txt";
         BufferedReader br_yes = new BufferedReader(new FileReader(filename_yes)); 

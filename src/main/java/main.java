@@ -37,10 +37,10 @@ public class main {
         
 //        Boolean classify_user = true;
         Boolean classify_user = false;
+        if (classify_user){
+            UsersCandidatesSupporter.UserYesNoSupporter.createUserClassification();
+        }
                 
-       
-        
-         
      }
     
 }

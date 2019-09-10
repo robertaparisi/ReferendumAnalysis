@@ -9,6 +9,8 @@ import static UsersCandidatesSupporter.UserYesNoSupporter.classifyUsers;
 import static analysis.SAXanalysisAndKMeans.cluster_directory;
 import static com.google.common.math.IntMath.mod;
 import static com.google.common.math.LongMath.mod;
+import com.sun.corba.se.impl.orbutil.graph.Graph;
+import it.stilo.g.structures.WeightedDirectedGraph;
 import java.io.BufferedReader;
 import java.io.FileInputStream;
 import java.io.FileReader;
@@ -145,19 +147,23 @@ public class Prova {
 //        user_no_pw.close();
         
         
-        String filename = "src/main/resources/data/yes_user.txt";
-        BufferedReader br = new BufferedReader(new FileReader(filename)); 
-        String users = br.readLine();//.split(",");
-        String[] users_list = users.split(", ");//.substring(1, users.length()-1)
-        int i = 0;
-        for(String u: users_list){
-            i++;
-            System.out.println(u);
-            
-        }
-        System.out.println(i);
+//        String filename = "src/main/resources/data/yes_user.txt";
+//        BufferedReader br = new BufferedReader(new FileReader(filename)); 
+//        String users = br.readLine();//.split(",");
+//        String[] users_list = users.split(", ");//.substring(1, users.length()-1)
+//        int i = 0;
+//        for(String u: users_list){
+//            i++;
+//            System.out.println(u);
+//            
+//        }
+//        System.out.println(i);
 //
 //        
+        
+        Graph ga = new Graph();
+        WeightedDirectedGraph g = ga.getGraph();
+        List<String> ids = new ArrayList<>();
           
         
         

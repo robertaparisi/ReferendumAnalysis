@@ -14,7 +14,11 @@ import it.stilo.g.algo.SubGraph;
 import it.stilo.g.structures.DoubleValues;
 import it.stilo.g.structures.WeightedDirectedGraph;
 import it.stilo.g.structures.WeightedUndirectedGraph;
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -69,43 +73,25 @@ public class GraphAnalysis {
         return s;
     }
     
-    public static void getGraphAnalysis(){
+    public static void getGraphAnalysis() throws FileNotFoundException, IOException{
         
         
         String yes_filename = "src/main/resources/data/yes_user.txt";
         String no_filename = "src/main/resources/data/no_user.txt";
+        
+        
 
-        YESNOsupporters s = new YESNOsupporters();
-        Graph ga = new Graph() {};
-        WeightedDirectedGraph g = ga.getGraph();
-        List<String> ids = new ArrayList<>();
-        ids.addAll(s.getIDs("YNsupporters/results1/Myes.txt"));
-        ids.addAll(s.getIDs("YNsupporters/results1/Mno.txt"));
-        int[] nodes = ga.getNodes(ids);
-        System.out.println("nodes:" + nodes.length);
-        WeightedDirectedGraph gnew = SubGraph.extract(g, nodes, 2);
+        BufferedReader br;
+        br = new BufferedReader(new FileReader(yes_filename)); 
+        String users_yes = br.readLine();//.split(",");
+        String[] users_list_yes = users_yes.substring(1, users_yes.length()-1).split(", ");
+        
+        br = new BufferedReader(new FileReader(no_filename)); 
+        String users_no = br.readLine();//.split(",");
+        String[] users_list_no = users_no.substring(1, users_yes.length()-1).split(", ");
+        
 
-        // PROVA
-        Set<Integer> n = new HashSet<>();
-        for (int i = 0; i < gnew.in.length; i++) {
-            if (gnew.in[i] != null) {
-                for (int j = 0; j < gnew.in[i].length; j++) {
-                    n.add(gnew.in[i][j]);
-                }
-            }
-
-        }
-        System.out.println(n.size());
-        //
-
-        Set<Integer> lc = largestComponent(gnew);
-        System.out.println("lcc size: " + lc.size());
-        int[] lca = lc.stream().mapToInt(i -> i).toArray();
-        WeightedDirectedGraph lcGraph = SubGraph.extract(g, lca, 2);
-        ga.saveGraph(lcGraph, results);
-        ArrayList<ArrayList<DoubleValues>> hits = HubnessAuthority.compute(lcGraph, 0.00001, 2);
-        ga.getAuthorities(hits, 1000, results + "/authorities.txt");
-        ga.getHubs(hits, 1000, results + "/hubs.txt");
+        
     }
     
 }
