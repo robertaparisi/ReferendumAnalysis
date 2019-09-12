@@ -112,9 +112,9 @@ public class CooccurenceGraphs {
         WeightedUndirectedGraph graph = new WeightedUndirectedGraph(cluster_list.length); 
         File directory = new File(index_dir);
         IndexReader index_reader = DirectoryReader.open(FSDirectory.open(directory));
-        ArrayList<String> nodes1 = new ArrayList<>();
-        ArrayList<String> nodes2 = new ArrayList<>();
-        ArrayList<Integer> weights = new  ArrayList<>(); 
+//        ArrayList<String> nodes1 = new ArrayList<>();
+//        ArrayList<String> nodes2 = new ArrayList<>();
+//        ArrayList<Integer> weights = new  ArrayList<>(); 
         System.out.println("Starting term analysis for the cluster");
         for (int i = 0; i < cluster_list.length-1; i++){
             String term1 = cluster_list[i];

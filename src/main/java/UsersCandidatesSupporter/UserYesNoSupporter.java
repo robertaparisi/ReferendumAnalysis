@@ -5,11 +5,9 @@
  */
 package UsersCandidatesSupporter;
 
-import static analysis.CooccurenceGraphs.cooccurence_graph_directory;
 import static indexing.ClassifyPoliticiansYesNo.no_tags;
 import static indexing.ClassifyPoliticiansYesNo.yes_tags;
 import indexing.TweetIndex;
-import static indexing.TweetIndex.sourcenames_directory;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
@@ -26,15 +24,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.zip.GZIPInputStream;
-import static org.apache.commons.math3.analysis.FunctionUtils.collector;
-import static org.apache.commons.math3.analysis.FunctionUtils.collector;
-import org.apache.lucene.analysis.it.ItalianAnalyzer;
-import org.apache.lucene.document.Document;
 import org.apache.lucene.index.DirectoryReader;
 import org.apache.lucene.index.IndexReader;
 import org.apache.lucene.index.Term;
 import org.apache.lucene.queryparser.classic.ParseException;
-import org.apache.lucene.queryparser.classic.QueryParser;
 import org.apache.lucene.search.BooleanClause;
 import org.apache.lucene.search.BooleanQuery;
 import org.apache.lucene.search.IndexSearcher;
@@ -43,13 +36,9 @@ import org.apache.lucene.search.ScoreDoc;
 import org.apache.lucene.search.TermQuery;
 import org.apache.lucene.search.TopDocs;
 import org.apache.lucene.search.TotalHitCountCollector;
-import org.apache.lucene.store.Directory;
 import org.apache.lucene.store.FSDirectory;
 import org.apache.lucene.util.BytesRef;
 import org.apache.lucene.util.NumericUtils;
-import org.apache.lucene.util.Version;
-import static org.apache.lucene.util.Version.LUCENE_41;
-import sun.print.PrinterJobWrapper;
 
 /**
  *

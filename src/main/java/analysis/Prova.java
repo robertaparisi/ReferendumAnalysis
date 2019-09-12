@@ -6,11 +6,19 @@
 package analysis;
 
 import static UsersCandidatesSupporter.UserYesNoSupporter.classifyUsers;
+import static UsersCandidatesSupporter.UserYesNoSupporter.getUserID;
 import static analysis.SAXanalysisAndKMeans.cluster_directory;
+import com.google.common.collect.ObjectArrays;
 import static com.google.common.math.IntMath.mod;
 import static com.google.common.math.LongMath.mod;
 import com.sun.corba.se.impl.orbutil.graph.Graph;
+import it.stilo.g.algo.HubnessAuthority;
+import it.stilo.g.algo.SubGraph;
+import it.stilo.g.structures.DoubleValues;
+import it.stilo.g.structures.LongIntDict;
 import it.stilo.g.structures.WeightedDirectedGraph;
+import it.stilo.g.structures.WeightedUndirectedGraph;
+import it.stilo.g.util.GraphReader;
 import java.io.BufferedReader;
 import java.io.FileInputStream;
 import java.io.FileReader;
@@ -20,13 +28,22 @@ import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
 import java.util.zip.GZIPInputStream;
+import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
+import static org.apache.commons.math3.stat.inference.TestUtils.g;
 import org.apache.lucene.queryparser.classic.ParseException;
+import org.apache.lucene.util.BytesRef;
+import org.apache.lucene.util.NumericUtils;
 
 /**
  *
@@ -159,21 +176,138 @@ public class Prova {
 //        }
 //        System.out.println(i);
 //
+//      
+        
+                
+        String yes_filename = "src/main/resources/data/yes_user.txt";
+        String no_filename = "src/main/resources/data/no_user.txt";
+        String graphFilename = "src/main/resources/data/Official_SBN-ITA-2016-Net.gz";
+        
+
+        BufferedReader br;
+        br = new BufferedReader(new FileReader(yes_filename)); 
+        String users_yes = br.readLine();//.split(",");
+        String[] users_list_yes = users_yes.substring(1, users_yes.length()-1).split(", ");
+        
+        br = new BufferedReader(new FileReader(no_filename)); 
+        String users_no = br.readLine();//.split(",");
+        String[] users_list_no = users_no.substring(1, users_yes.length()-1).split(", ");
+        
+//        Set<String> user_id = getUserID();
+//
+//        for (String user : user_id) {
+// 
+//            System.out.println("User id: " + user);
+//            BytesRef ref = new BytesRef();
+//            NumericUtils.longToPrefixCoded(Long.parseLong(user), 0, ref);
+//            System.out.println("Ref "+ ref);
+        LongIntDict mapLong2Int = new LongIntDict();    
+        List<String> list_ids = Arrays.asList(ObjectArrays.concat(users_list_no, users_list_yes, String.class));
+        WeightedUndirectedGraph graph = new WeightedUndirectedGraph(450193);
+        GraphReader.readGraphLong2IntRemap(graph, graphFilename, mapLong2Int, true);
+        
+//        System.out.println("sizeeeee      " + list_ids.size());
+////        max             798190783299928064
+//        long max = 0;
+//        for (int i = 0; i<list_ids.size(); i++){
+//            System.out.println(i+" "+ list_ids.get(i));
+//            if (max< Long.parseLong(list_ids.get(i))){
+//                max = Long.parseLong(list_ids.get(i));
+//            }
+//        }
+//        System.out.println("max             "+max);
+//        b = Arrays.asList(ArrayUtils.toObject(list_ids));
+        
+        List<Integer> intList = list_ids.stream().map((s) -> mapLong2Int.get(Long.parseLong(s))).collect(Collectors.toList());
 //        
+//        Integer[] intlist = (Integer[]) list_ids.stream().map((String x)->Integer.valueOf(x)).toArray();
+//        newThing = Collections.sort(int_list);
+//        Optional<Integer> max = Arrays.stream(intlist).reduce((x, y) -> x > y ? x : y);
+
+//        WeightedUndirectedGraph graph;// = new WeightedUndirectedGraph(list_ids.size());
+////    
+//        FileInputStream fstream = new FileInputStream("src/main/resources/data/Newgraph.gz");
+//        GZIPInputStream gzStream = new GZIPInputStream(fstream);
+//        InputStreamReader input_stream_reader = new InputStreamReader(gzStream, "UTF-8");
+//        br = new BufferedReader(input_stream_reader);   
+//        String edge;
+//        
+//        while ((edge = br.readLine())!= null){
+//            System.out.println("Nuovo : "+ edge);
+//        }
+//        LongIntDict mapLong2Int = new LongIntDict();
+//        graph = new WeightedUndirectedGraph(16815934);
+////        graphFilename = "Official_SBN-ITA-2016-Net.gz";
+//        mapLong2Int = new LongIntDict();
+//        GraphReader.readGraphLong2IntRemap(graph, graphFilename, mapLong2Int, false);
         
-        Graph ga = new Graph();
-        WeightedDirectedGraph g = ga.getGraph();
-        List<String> ids = new ArrayList<>();
-          
         
-        
-        
-            
-        
+
+//        String edge;
+//        String nodes1;
+//        String nodes2;
+//        int weight;
+//        while ((edge = br.readLine()) != null) {
+//            nodes1 = edge.split("\t")[0];
+//            nodes2 = edge.split("\t")[1];
+//            weight = Integer.parseInt(edge.split("\t")[2]);
+//            if (list_ids.contains(nodes1) & list_ids.contains(nodes2)){
+//                graph.add(Integer.parseInt(nodes1), Integer.parseInt(nodes2), weight);
+//            }
+//            System.out.println("Peso: " );
+//        }
+//  // PROVA
+//        Set<Integer> n = new HashSet<>();
+//        for (int i = 0; i < gnew.in.length; i++) {
+//            if (gnew.in[i] != null) {
+//                for (int j = 0; j < gnew.in[i].length; j++) {
+//                    n.add(gnew.in[i][j]);
+//                }
+//            }
+//
+//        }
+//        System.out.println(n.size());
+//        //
+//
+//        Set<Integer> lc = largestComponent(gnew);
+//        System.out.println("lcc size: " + lc.size());
+//        int[] lca = lc.stream().mapToInt(i -> i).toArray();
+//        WeightedDirectedGraph lcGraph = SubGraph.extract(g, lca, 2);
+//        ga.saveGraph(lcGraph, results);
+//        ArrayList<ArrayList<DoubleValues>> hits = HubnessAuthority.compute(lcGraph, 0.00001, 2);
+//        ga.getAuthorities(hits, 1000, results + "/authorities.txt");
+//        ga.getHubs(hits, 1000, results + "/hubs.txt");
+//
+//
+//
+//
+//
+//        
+//         if (loadGraph) {
+//            graphSize = 16815933;
+//            g = new WeightedDirectedGraph(graphSize + 1);
+//            
+//            mapLong2Int = new LongIntDict();
+//            GraphReader.readGraphLong2IntRemap(g, RESOURCES_LOCATION + graphFilename, mapLong2Int, false);
+//        }
+//        
+//        if (calculateTopAuthorities) {
+//            LinkedHashSet<Integer> users = analysis.GraphAnalysis.getUsersMentionedPolitician(useCache, mapLong2Int);
+//            // convert the set to array of int, needed by the method "SubGraph.extract"
+//            int[] usersIDs = new int[users.size()];
+//            i = 0;
+//            for (Integer userId : users) {
+//                usersIDs[i] = userId;
+//                i++;
+//            }
+//
+//            MappedWeightedGraph gmap = analysis.GraphAnalysis.extractLargestCCofM(g, usersIDs, mapLong2Int);
+//            analysis.GraphAnalysis.saveTopKAuthorities(gmap, users, mapLong2Int, 1000, useCache);
+//            TweetsOpinion.saveTop500HubnessAuthorities(gmap, users, mapLong2Int, 3);
+//            TweetsOpinion.hubnessGraph13();
            
         }
-           
-        
+     
                 
 
     }   
