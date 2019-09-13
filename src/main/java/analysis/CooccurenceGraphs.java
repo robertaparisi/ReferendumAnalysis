@@ -16,7 +16,6 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Set;
 import org.apache.lucene.analysis.Analyzer;
@@ -164,9 +163,7 @@ public class CooccurenceGraphs {
             }   
             kcore_pw.println(Arrays.toString(kcore_nodes));
         }       
-//        int[] nodes_subgraph =  largest_component.stream().mapToInt(i->i).toArray();
-//        WeightedUndirectedGraph sub_graph = it.stilo.g.algo.SubGraph.extract(graph, nodes_subgraph, runner);
-//        return (sub_graph);
+
     }
     
     /*
