@@ -230,8 +230,6 @@ public class GraphAnalysisUsers {
                 final_scores_yes.put(authority, final_score);
             }
             else if (no_supporters_list.contains(authority)){
-                System.out.println("score_no "+ normalized_scores_no.get(authority));
-                System.out.println("auth score "+ auth_score_normalized);
                final_score = 0.3 *normalized_scores_no.get(authority) + 0.7* auth_score_normalized;
                final_scores_yes.put(authority, final_score);
             }

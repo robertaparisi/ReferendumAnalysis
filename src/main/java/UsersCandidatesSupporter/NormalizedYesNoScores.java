@@ -207,7 +207,7 @@ public class NormalizedYesNoScores {
                 scores_yes.put(authority,score) ;
             } else{
                 int score = computeNoPoints(no_tag_count, no_pol_mention_count, no_tag_count, no_pol_mention_count);
-                scores_yes.put(authority, score);
+                scores_no.put(authority, score);
             }         
         }
         int max_yes = getMaxScore(scores_yes);
