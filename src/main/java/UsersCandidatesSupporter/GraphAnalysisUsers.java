@@ -221,15 +221,18 @@ public class GraphAnalysisUsers {
         
         System.out.println("1. Let's firt obtain the scores for all the authorities...");
         for (int i=0; i<authorities.size();i++){
+            System.out.println(i);
             authority = mapper.getNode(authorities.get(i).index);
             double auth_score_normalized = authorities.get(i).value/max;
 //            authority_data = getUserNameScreenname(authority, searcher);
             if (yes_supporters_list.contains(authority)){
-                final_score = 0.5 *normalized_scores_yes.get(authority) + 0.5* auth_score_normalized;
+                final_score = 0.3 *normalized_scores_yes.get(authority) + 0.7*auth_score_normalized;
                 final_scores_yes.put(authority, final_score);
             }
-            else{
-               final_score = 0.5 *normalized_scores_no.get(authority) + 0.5* auth_score_normalized;
+            else if (no_supporters_list.contains(authority)){
+                System.out.println("score_no "+ normalized_scores_no.get(authority));
+                System.out.println("auth score "+ auth_score_normalized);
+               final_score = 0.3 *normalized_scores_no.get(authority) + 0.7* auth_score_normalized;
                final_scores_yes.put(authority, final_score);
             }
         }
@@ -256,14 +259,15 @@ public class GraphAnalysisUsers {
             authority_data = getUserNameScreenname(authority, searcher);
             pw_yes.println(authority_data[0] + " " +authority_data[1] + " " + authority + " " + yes_score_sorted.get(i).getValue());          
         }
+        pw_yes.close();
         
         System.out.println("4. Saving no file");
         for (int i=0; i<500; i++){
             authority = no_score_sorted.get(i).getKey();
             authority_data = getUserNameScreenname(authority, searcher);
-            pw_yes.println(authority_data[0] + " " +authority_data[1] + " " + authority + " " + no_score_sorted.get(i).getValue());          
+            pw_no.println(authority_data[0] + " " +authority_data[1] + " " + authority + " " + no_score_sorted.get(i).getValue());          
         }
-        
+        pw_no.close();
     }
     
     public ArrayList<DoubleValues> getHITSandTop500(WeightedDirectedGraph largest_component_graph, String[] users_list_yes, String[] users_list_no, IndexSearcher searcher) throws FileNotFoundException, IOException{

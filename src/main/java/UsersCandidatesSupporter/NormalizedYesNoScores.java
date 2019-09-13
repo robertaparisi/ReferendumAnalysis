@@ -8,6 +8,8 @@ package UsersCandidatesSupporter;
 import static indexing.ClassifyPoliticiansYesNo.no_tags;
 import static indexing.ClassifyPoliticiansYesNo.yes_tags;
 import indexing.TweetIndex;
+import static indexing.TweetIndex.output_data_directory;
+import static indexing.TweetIndex.sourcenames_directory;
 import it.stilo.g.structures.DoubleValues;
 import java.io.BufferedReader;
 import java.io.File;
@@ -16,7 +18,6 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.index.DirectoryReader;
@@ -119,11 +120,11 @@ public class NormalizedYesNoScores {
         IndexReader index_reader = DirectoryReader.open(FSDirectory.open(new File(TweetIndex.tweets_index_directory)));
         IndexSearcher searcher = new IndexSearcher(index_reader); 
         
-        String filename_yes = "src/main/resources/data/yes_politicians.txt";
+        String filename_yes = sourcenames_directory +"yes_politicians.txt";
         BufferedReader br_yes = new BufferedReader(new FileReader(filename_yes)); 
         String[] yes_politicians = br_yes.readLine().split(",");
         
-        String filename_no = "src/main/resources/data/no_politicians.txt";
+        String filename_no = sourcenames_directory + "no_politicians.txt";
         BufferedReader br_no = new BufferedReader(new FileReader(filename_no)); 
         String[] no_politicians = br_no.readLine().split(",");  
         
@@ -211,9 +212,9 @@ public class NormalizedYesNoScores {
         }
         int max_yes = getMaxScore(scores_yes);
         int max_no = getMaxScore(scores_no);
-        String fileoutput_no= "src/main/resources/outputData/normalizedScoresNo.txt";
+        String fileoutput_no = output_data_directory + "normalizedScoresNo.txt";
         
-        String fileoutput_yes = "src/main/resources/outputData/normalizedScoresYes.txt";
+        String fileoutput_yes = output_data_directory + "normalizedScoresYes.txt";
         
         HashMap<String, Double> new_scores_no = saveNormalizedScores(scores_no, max_no, fileoutput_no, searcher);
         HashMap<String, Double> new_scores_yes = saveNormalizedScores(scores_yes, max_yes, fileoutput_yes, searcher);

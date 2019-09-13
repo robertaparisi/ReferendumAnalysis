@@ -8,6 +8,7 @@ package UsersCandidatesSupporter;
 import static indexing.ClassifyPoliticiansYesNo.no_tags;
 import static indexing.ClassifyPoliticiansYesNo.yes_tags;
 import indexing.TweetIndex;
+import static indexing.TweetIndex.sourcenames_directory;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
@@ -186,11 +187,11 @@ public class UserYesNoSupporter {
     
     public static void createUserClassification() throws FileNotFoundException, IOException, ParseException{
         
-        String filename_yes = "src/main/resources/data/yes_politicians.txt";
+        String filename_yes = sourcenames_directory +"yes_politicians.txt";
         BufferedReader br_yes = new BufferedReader(new FileReader(filename_yes)); 
         String[] yes_politicians = br_yes.readLine().split(",");
         
-        String filename_no = "src/main/resources/data/no_politicians.txt";
+        String filename_no = sourcenames_directory +"no_politicians.txt";
         BufferedReader br_no = new BufferedReader(new FileReader(filename_no)); 
         String[] no_politicians = br_no.readLine().split(",");  
         
