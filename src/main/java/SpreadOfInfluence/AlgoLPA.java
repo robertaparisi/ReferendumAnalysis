@@ -119,34 +119,40 @@ public class AlgoLPA implements Runnable {
         int last = -1;
 //        System.out.println("Neighborhood list "+ Arrays.toString(neighborhood));
 //        System.out.println("Lenght neuigh "+ neighborhood.length);
-        for (int i = 0; i < neighborhood.length; i++) {
-//            System.out.println("i: " +i);            
-//            System.out.println("best "+ best);
-            if (maxCount > (neighborhood.length - i)) {
-//                System.out.println("break");
-                break;
+        if (neighborhood.length == 0) {
+            return 0;
+        }else if (neighborhood.length == 1) {
+            return neighborhood[0];
+        } else{
+            for (int i = 0; i < neighborhood.length; i++) {
+    //            System.out.println("i: " +i);            
+    //            System.out.println("best "+ best);
+                if (maxCount > (neighborhood.length - i)) {
+    //                System.out.println("break");
+                    break;
+                }
+
+                if (neighborhood[i] == last) {
+    //                System.out.println("neighboor "+ neighborhood[i]);
+                    counter++;
+
+                } else {
+    //                System.out.println("neigh False "+ neighborhood[i]);
+                    counter = 1;
+                    last = neighborhood[i];
+                }
             }
 
-            if (neighborhood[i] == last) {
-//                System.out.println("neighboor "+ neighborhood[i]);
-                counter++;
- 
-            } else {
-//                System.out.println("neigh False "+ neighborhood[i]);
-                counter = 1;
-                last = neighborhood[i];
+            if (maxCount <= 1) {
+                return neighborhood[rnd.nextInt(neighborhood.length)];
             }
+            return best;
         }
-
-        if (maxCount <= 1) {
-            return neighborhood[rnd.nextInt(neighborhood.length)];
-        }
-        return best;
     }
 
     public static int[] compute(final WeightedGraph g, int[] initial_labels , double threshold, int runner) {
         
-        AlgoLPA.rnd = new Random(250293);
+        AlgoLPA.rnd = new Random(2502931);
 
         int[] labels = initial_labels;
         int[] newLabels = labels;
