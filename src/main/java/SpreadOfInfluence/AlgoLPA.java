@@ -40,14 +40,9 @@ import org.apache.logging.log4j.Logger;
  *
  * @author stilo
  */
+public class AlgoLPA implements Runnable {
 
-/**
- *
- * @author Roberta
- */
-public class LPA implements Runnable {
-
-    private static final Logger logger = LogManager.getLogger(LPA.class);
+    private static final Logger logger = LogManager.getLogger(AlgoLPA.class);
 
     private static Random rnd;
     private WeightedGraph g;
@@ -59,7 +54,7 @@ public class LPA implements Runnable {
     private int[] labels;
     private int[] list = null;
 
-    private LPA(WeightedGraph g, CountDownLatch cb, int[] labels, int chunk, int runner) {
+    private AlgoLPA(WeightedGraph g, CountDownLatch cb, int[] labels, int chunk, int runner) {
         this.g = g;
         this.runner = runner;
         this.barrier = cb;
@@ -73,21 +68,15 @@ public class LPA implements Runnable {
             list = new int[(g.in.length / runner) + runner];
 
             int j = 0;
-
             for (int i = chunk; i < g.in.length; i += runner) {
 
-                if (g.in[i] != null) {
-                    labels[i] = i;
+                if (g.in[i] != null && labels[i]==0) {
+                    //System.out.println(labels[i]);
                     list[j] = i;
                     j++;
-                } else {
-                    if (g.out[i] != null) {
-                        labels[i] = i;
-                    } else {
-                        labels[i] = -1;
-                    }
                 }
             }
+            
             list = Arrays.copyOf(list, j);
 
             //Shuffle
@@ -113,7 +102,10 @@ public class LPA implements Runnable {
                 for (int x = 0; x < near.length; x++) {
                     nearLabs[x] = labels[near[x]];
                 }
-                labels[list[i]] = bestLabel(nearLabs);
+                int best_label = bestLabel(nearLabs);
+                if (best_label!=0){
+                    labels[list[i]] = best_label;
+                }
             }
         }
         barrier.countDown();
@@ -125,19 +117,23 @@ public class LPA implements Runnable {
         int maxCount = -1;
         int counter = 0;
         int last = -1;
+//        System.out.println("Neighborhood list "+ Arrays.toString(neighborhood));
+//        System.out.println("Lenght neuigh "+ neighborhood.length);
         for (int i = 0; i < neighborhood.length; i++) {
+//            System.out.println("i: " +i);            
+//            System.out.println("best "+ best);
             if (maxCount > (neighborhood.length - i)) {
+//                System.out.println("break");
                 break;
             }
 
             if (neighborhood[i] == last) {
+//                System.out.println("neighboor "+ neighborhood[i]);
                 counter++;
-                if (counter > maxCount) {
-                    maxCount = counter;
-                    best = last;
-                }
+ 
             } else {
-                counter = 0;
+//                System.out.println("neigh False "+ neighborhood[i]);
+                counter = 1;
                 last = neighborhood[i];
             }
         }
@@ -148,21 +144,21 @@ public class LPA implements Runnable {
         return best;
     }
 
-    public static int[] compute(final WeightedGraph g, double threshold, int runner) {
+    public static int[] compute(final WeightedGraph g, int[] initial_labels , double threshold, int runner) {
+        
+        AlgoLPA.rnd = new Random(250293);
 
-        LPA.rnd = new Random(System.currentTimeMillis());
-
-        int[] labels = new int[g.size];
+        int[] labels = initial_labels;
         int[] newLabels = labels;
         int iter = 0;
 
         long time = System.nanoTime();
         CountDownLatch latch = null;
 
-        LPA[] runners = new LPA[runner];
+        AlgoLPA[] runners = new AlgoLPA[runner];
 
         for (int i = 0; i < runner; i++) {
-            runners[i] = new LPA(g, latch, labels, i, runner);
+            runners[i] = new AlgoLPA(g, latch, labels, i, runner);
         }
 
         ExecutorService ex = Executors.newFixedThreadPool(runner);
@@ -215,4 +211,3 @@ public class LPA implements Runnable {
         return !Arrays.equals(labels, newLabels);
     }
 }
-

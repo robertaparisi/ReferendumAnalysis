@@ -153,6 +153,8 @@ public class GraphAnalysisUsers {
         
         System.out.println("Number of Yes Authorities: "+ yes_countA);
         System.out.println("Number of No Authorities: "+ no_countA);
+        pw_yes.close();
+        pw_no.close();
     }
     
     public void getHubness(ArrayList<DoubleValues> hubness,  String[] users_list_yes, String[] users_list_no, IndexSearcher searcher) throws FileNotFoundException, IOException{
@@ -207,6 +209,7 @@ public class GraphAnalysisUsers {
         
         int yes_count= 0;
         int no_count = 0;
+        
         String[] authority_data;
         List<String> yes_supporters_list = Arrays.asList(users_list_yes);
         
@@ -215,7 +218,8 @@ public class GraphAnalysisUsers {
         HashMap<String, Double> final_scores_yes = new HashMap<>();
         HashMap<String, Double> final_scores_no = new HashMap<>();
         
-        Double max = authorities.get(0).value;
+//        Double max_auth = authorities.get(0).value;
+//        Double max_hub = hubness.get(0).value;
         String authority;
         double final_score;
         
@@ -223,15 +227,22 @@ public class GraphAnalysisUsers {
         for (int i=0; i<authorities.size();i++){
             System.out.println(i);
             authority = mapper.getNode(authorities.get(i).index);
-            double auth_score_normalized = authorities.get(i).value/max;
-//            authority_data = getUserNameScreenname(authority, searcher);
+            
+            double auth_score_normalized = authorities.get(i).value;////max_auth;
+            
+//            double hub_score_normalized = hubness.indexOf(authorities.get(i).index)/max_hub;
+//            System.out.println("hub_score "+ hubness.indexOf(authorities.get(i).index) + " MAX HUB "+ max_hub);
             if (yes_supporters_list.contains(authority)){
-                final_score = 0.3 *normalized_scores_yes.get(authority) + 0.7*auth_score_normalized;
+//                System.out.println("Nuovi score: "+ normalized_scores_yes.get(authority) +" "+ auth_score_normalized +" " + hub_score_normalized);
+                final_score = 0.5 * normalized_scores_yes.get(authority) + 0.5*auth_score_normalized ;
+//                System.out.println("totale: "+ final_score);
                 final_scores_yes.put(authority, final_score);
+//                System.out.println("========================");
             }
-            else if (no_supporters_list.contains(authority)){
-               final_score = 0.3 *normalized_scores_no.get(authority) + 0.7* auth_score_normalized;
-               final_scores_yes.put(authority, final_score);
+            else{
+//               System.out.println(i);
+               final_score = 0.5 *normalized_scores_no.get(authority) + 0.5* auth_score_normalized ;
+               final_scores_no.put(authority, final_score);
             }
         }
         
@@ -268,7 +279,7 @@ public class GraphAnalysisUsers {
         pw_no.close();
     }
     
-    public ArrayList<DoubleValues> getHITSandTop500(WeightedDirectedGraph largest_component_graph, String[] users_list_yes, String[] users_list_no, IndexSearcher searcher) throws FileNotFoundException, IOException{
+    public void getHITSandTop500(WeightedDirectedGraph largest_component_graph, String[] users_list_yes, String[] users_list_no, IndexSearcher searcher) throws FileNotFoundException, IOException{
         
         System.out.println("Computing HITS...");
         //HITS
@@ -292,9 +303,27 @@ public class GraphAnalysisUsers {
         
         
         
-        
-        return (authorities);
+       
     }
+    
+    public static WeightedDirectedGraph getGraph() throws FileNotFoundException, IOException {
+        WeightedDirectedGraph g = new WeightedDirectedGraph(1000000);
+        FileInputStream fstream = new FileInputStream(graphFilename);
+        GZIPInputStream gzStream = new GZIPInputStream(fstream);
+        InputStreamReader inputStreamReader = new InputStreamReader(gzStream, "UTF-8");
+        BufferedReader br = new BufferedReader(inputStreamReader);
+
+        String edge;
+
+        while ((edge = br.readLine()) != null) {
+            String node1 = edge.split("\t")[0];
+            String node2 = edge.split("\t")[1];
+            double weight = Double.parseDouble(edge.split("\t")[2]);
+            g.add(mapper.getId(node1), mapper.getId(node2), weight);
+        }
+        return g;
+    }
+
     
 //    public static void main(String[] args) throws FileNotFoundException, IOException, InterruptedException{
     public WeightedDirectedGraph saveLccHITSandTop500() throws FileNotFoundException, IOException, InterruptedException{
@@ -303,8 +332,9 @@ public class GraphAnalysisUsers {
         IndexSearcher searcher = new IndexSearcher(index_reader); 
         System.out.println("Loading graph...");
         //subgraph of the graph provided, with only the ids of the user finded before
-        WeightedDirectedGraph graph = new WeightedDirectedGraph(1000000);
-        GraphReader.readGraphLong2IntRemap(graph, graphFilename, mapLongToInt, false);
+//        WeightedDirectedGraph graph = new WeightedDirectedGraph(1000000);
+        WeightedDirectedGraph graph = getGraph();
+//        GraphReader.readGraphLong2IntRemap(graph, graphFilename, mapLongToInt, false);
         System.out.println("Creating the subgraph...");
         WeightedDirectedGraph subgraph = SubGraph.extract(graph, nodes, runner);
         System.out.println("Computing LCC...");
@@ -313,7 +343,7 @@ public class GraphAnalysisUsers {
         WeightedDirectedGraph largest_component_graph = SubGraph.extract(graph, lcc, runner);
         getHITSandTop500(largest_component_graph, users_list_yes, users_list_no, searcher);      
         
-        return(largest_component_graph);
+        return(graph);
 
      }
 }

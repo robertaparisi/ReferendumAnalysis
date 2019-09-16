@@ -12,6 +12,7 @@ import com.google.common.collect.ObjectArrays;
 import static com.google.common.math.IntMath.mod;
 import static com.google.common.math.LongMath.mod;
 import com.sun.corba.se.impl.orbutil.graph.Graph;
+import indexing.TweetIndex;
 import it.stilo.g.algo.HubnessAuthority;
 import it.stilo.g.algo.SubGraph;
 import it.stilo.g.structures.DoubleValues;
@@ -20,6 +21,7 @@ import it.stilo.g.structures.WeightedDirectedGraph;
 import it.stilo.g.structures.WeightedUndirectedGraph;
 import it.stilo.g.util.GraphReader;
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileReader;
 import java.io.FileWriter;
@@ -41,7 +43,16 @@ import java.util.zip.GZIPInputStream;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 import static org.apache.commons.math3.stat.inference.TestUtils.g;
+import org.apache.lucene.document.Document;
+import org.apache.lucene.index.DirectoryReader;
+import org.apache.lucene.index.IndexReader;
+import org.apache.lucene.index.Term;
 import org.apache.lucene.queryparser.classic.ParseException;
+import org.apache.lucene.search.IndexSearcher;
+import org.apache.lucene.search.ScoreDoc;
+import org.apache.lucene.search.TermQuery;
+import org.apache.lucene.search.TopDocs;
+import org.apache.lucene.store.FSDirectory;
 import org.apache.lucene.util.BytesRef;
 import org.apache.lucene.util.NumericUtils;
 
@@ -50,7 +61,31 @@ import org.apache.lucene.util.NumericUtils;
  * @author Roberta
  */
 public class Prova {
-     
+    public static void countFreq(int arr[], int n){ 
+            Map<Integer, Integer> mp = new HashMap<>(); 
+
+            // Traverse through array elements and  
+            // count frequencies  
+            for (int i = 0; i < n; i++) 
+            { 
+                mp.put(arr[i], mp.get(arr[i]) == null ? 1 : mp.get(arr[i]) + 1); 
+            } 
+
+            // To print elements according to first  
+            // occurrence, traverse array one more time  
+            // print frequencies of elements and mark  
+            // frequencies as -1 so that same element  
+            // is not printed multiple times.  
+            for (int i = 0; i < n; i++)  
+            { 
+                if (mp.get(arr[i]) != -1)  
+                { 
+                    System.out.println(arr[i] + " " + mp.get(arr[i])); 
+                    mp.put(arr[i], -1); 
+                } 
+            } 
+        } 
+    
     public static void main(String[] args) throws IOException, ParseException  
     {   
         LinkedHashSet<String> linkedset =  new LinkedHashSet<String>();   
@@ -116,6 +151,28 @@ public class Prova {
 //        boolean bool = vuo>=col | values>=th;
         System.out.println(values);
         
+        
+        
+        String top500yes = "src/main/resources/outputData/top500_centralNO.txt";    
+        BufferedReader br = new BufferedReader( new FileReader(top500yes));
+        List<String> user_id = new ArrayList<>();
+        String row;
+        while((row=br.readLine())!=null){
+            String[] users_yes = br.readLine().split(" ");//.split(",");
+            user_id.add(users_yes[users_yes.length-2]);
+        }
+       
+        
+        
+        int arr[] = {10, 20, 20, 10, 10, 20, 5, 20}; 
+        int n = arr.length; 
+        countFreq(arr, n); 
+     
+        
+        
+//        String[] users_list_yes = users_yes.substring(1, users_yes.length()-1).split(", ");
+    
+        
 
 //        String cluster = cluster_directory + "yesClusterListGroup.txt"; 
 //        BufferedReader br = new BufferedReader(new FileReader(cluster)); 
@@ -179,19 +236,46 @@ public class Prova {
 //      
         
                 
-        String yes_filename = "src/main/resources/data/yes_user.txt";
-        String no_filename = "src/main/resources/data/no_user.txt";
-        String graphFilename = "src/main/resources/data/Official_SBN-ITA-2016-Net.gz";
+//        String yes_filename = "src/main/resources/data/yes_user.txt";
+//        String no_filename = "src/main/resources/data/no_user.txt";
+//        String graphFilename = "src/main/resources/data/Official_SBN-ITA-2016-Net.gz";
+//        String auth_yes =  "src/main/resources/outputData/yes_authorities.txt";
         
-
-        BufferedReader br;
-        br = new BufferedReader(new FileReader(yes_filename)); 
-        String users_yes = br.readLine();//.split(",");
-        String[] users_list_yes = users_yes.substring(1, users_yes.length()-1).split(", ");
-        
-        br = new BufferedReader(new FileReader(no_filename)); 
-        String users_no = br.readLine();//.split(",");
-        String[] users_list_no = users_no.substring(1, users_yes.length()-1).split(", ");
+//        IndexReader index_reader = DirectoryReader.open(FSDirectory.open(new File(TweetIndex.tweets_index_directory)));
+//        IndexSearcher searcher = new IndexSearcher(index_reader); 
+//
+//        BufferedReader br;
+//        br = new BufferedReader(new FileReader(yes_filename)); 
+//        String users_yes = br.readLine();//.split(",");
+//        String[] users_list_yes = users_yes.substring(1, users_yes.length()-1).split(", ");
+//        System.out.println("SIZE: " + users_list_yes.length );
+//        
+//        br = new BufferedReader(new FileReader(auth_yes)); 
+//        List<String> users_list_yes_auth = new ArrayList<>();
+//        String users_yes_auth;
+//        while((users_yes_auth = br.readLine())!= null){
+//            users_list_yes_auth.add(users_yes);
+//        }
+//       
+//        System.out.println("SIZE auth: " + users_list_yes_auth.size());
+//        PrintWriter pw = new PrintWriter("src/main/resources/data/yes_user_name.txt");
+//        for(String user: users_list_yes){
+//            BytesRef ref = new BytesRef();
+//            NumericUtils.longToPrefixCoded(Long.parseLong(user), 0, ref);
+//            TermQuery q = new TermQuery(new Term("id", ref));
+//            TopDocs top = searcher.search(q, 1);
+//            ScoreDoc[] hits = top.scoreDocs;
+//            Document doc = searcher.doc(hits[0].doc);
+//            String name = doc.get("name");
+//            String screenname = doc.get("screenname");
+//            String[] results = {name, screenname};
+//            pw.println(name +" "+ screenname+" "+ user);
+//        }
+//        pw.close();
+//        
+//        br = new BufferedReader(new FileReader(no_filename)); 
+//        String users_no = br.readLine();//.split(",");
+//        String[] users_list_no = users_no.substring(1, users_yes.length()-1).split(", ");
         
 //        Set<String> user_id = getUserID();
 //
@@ -201,10 +285,10 @@ public class Prova {
 //            BytesRef ref = new BytesRef();
 //            NumericUtils.longToPrefixCoded(Long.parseLong(user), 0, ref);
 //            System.out.println("Ref "+ ref);
-        LongIntDict mapLong2Int = new LongIntDict();    
-        List<String> list_ids = Arrays.asList(ObjectArrays.concat(users_list_no, users_list_yes, String.class));
-        WeightedUndirectedGraph graph = new WeightedUndirectedGraph(450193);
-        GraphReader.readGraphLong2IntRemap(graph, graphFilename, mapLong2Int, true);
+//        LongIntDict mapLong2Int = new LongIntDict();    
+//        List<String> list_ids = Arrays.asList(ObjectArrays.concat(users_list_no, users_list_yes, String.class));
+//        WeightedUndirectedGraph graph = new WeightedUndirectedGraph(450193);
+//        GraphReader.readGraphLong2IntRemap(graph, graphFilename, mapLong2Int, true);
         
 //        System.out.println("sizeeeee      " + list_ids.size());
 ////        max             798190783299928064
@@ -218,7 +302,7 @@ public class Prova {
 //        System.out.println("max             "+max);
 //        b = Arrays.asList(ArrayUtils.toObject(list_ids));
         
-        List<Integer> intList = list_ids.stream().map((s) -> mapLong2Int.get(Long.parseLong(s))).collect(Collectors.toList());
+//        List<Integer> intList = list_ids.stream().map((s) -> mapLong2Int.get(Long.parseLong(s))).collect(Collectors.toList());
 //        
 //        Integer[] intlist = (Integer[]) list_ids.stream().map((String x)->Integer.valueOf(x)).toArray();
 //        newThing = Collections.sort(int_list);
